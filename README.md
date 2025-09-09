@@ -224,7 +224,7 @@ npm run coverage
 
 #### ITCToken
 - Maximum supply: 1 billion tokens
-- EUR to ITC rate: 100:1
+- EUR to ITC rate: 10:1
 
 #### StripeIntegration
 - Entry fee: 250 basis points (2.5%)
@@ -239,15 +239,15 @@ npm run coverage
 ## 📊 Monitoring and Analytics
 
 ### Platform Statistics
-- Total empresas registered
+- Total companies registered
 - Total products created
 - Total invoices generated
-- Total customers registered
+- Total clients registered
 
 ### Empresa Statistics
 - Product count
 - Invoice count
-- Customer count
+- Client count
 - Total revenue
 
 ### Customer Analytics
@@ -260,7 +260,7 @@ npm run coverage
 
 ### Access Control
 - Owner-only functions for critical operations
-- Role-based permissions for empresa operations
+- Role-based permissions for company operations
 - Client registration requirements
 
 ### Financial Security

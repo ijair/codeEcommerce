@@ -9,11 +9,10 @@ The platform consists of the following main components:
 ### Core Contracts
 
 1. **ITCToken** - Custom ERC20 token for platform payments
-2. **Empresa** - Company/merchant management
-3. **Producto** - Product catalog and inventory management
-4. **Factura** - Invoice generation and tracking
-5. **Cliente** - Customer management and loyalty system
-6. **StripeIntegration** - EUR to ITC token conversion gateway
+2. **Company** - Company/merchant management
+3. **Product** - Product catalog and inventory management
+4. **Invoice** - Invoice generation and tracking
+5. **Client** - Customer management and loyalty system
 7. **Ecommerce** - Main orchestrator contract
 
 ### Entity Relationships
@@ -31,19 +30,19 @@ PRODUCT (Product)
 ├── Id: Unique product identifier
 ├── Name: Product name
 ├── Price: Price in ITC tokens
-└── Imagen: Product image URL/IPFS hash
+└── Image: Product image URL/IPFS hash
 
 INVOICE (Invoice)
 ├── AddressEmpresa: Company address
-├── Número: Invoice number
-├── Fecha: Creation date
-├── AddressCliente: Customer address
-└── ImporteTotal: Total amount in ITC tokens
+├── Number: Invoice number
+├── Date: Creation date
+├── AddressClient: Customer address
+└── purchaseTotal: Total amount in ITC tokens
 
 CLIENT (Customer)
-├── AddressEmpresa: Company address
-├── AddressCliente: Customer wallet address
-└── ComprasTotales: Total purchases in ITC tokens
+├── AddressCompany: Company address
+├── AddressClient: Customer wallet address
+└── purchaseTotals: Total purchases in ITC tokens
 ```
 
 ## 🚀 Features

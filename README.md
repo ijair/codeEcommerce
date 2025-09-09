@@ -76,8 +76,8 @@ CLIENT (Customer)
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
-   cd codeEcommerce
+   git clone git@github.com:ijair/codeEcommerce-backend.git
+   cd codeEcommerce-backend
    ```
 
 2. **Install dependencies**

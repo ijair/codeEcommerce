@@ -1,5 +1,5 @@
 {
-  "network": "hardhat",
+  "network": "localhost",
   "deployer": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
   "treasury": "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
   "contracts": {
@@ -10,5 +10,5 @@
     "Client": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9",
     "Ecommerce": "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707"
   },
-  "timestamp": "2025-09-09T07:43:12.153Z"
+  "timestamp": "2025-01-09T14:42:00.000Z"
 }

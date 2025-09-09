@@ -1,0 +1,12 @@
+[profile.default]
+src = "./contracts"
+optimizer = true
+optimizer_runs = 20_000
+out = "out"
+libs = ["node_modules", "lib"]
+remappings = [
+    "@openzeppelin/=node_modules/@openzeppelin/",
+    "hardhat/=node_modules/hardhat/",
+]
+
+# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options

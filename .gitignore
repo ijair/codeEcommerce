@@ -1,0 +1,16 @@
+# Environment variables
+.env
+
+# Node
+node_modules
+
+# Foundry
+out
+cache
+
+# Hardhat
+cache
+artifacts
+
+# Other
+.DS_Store

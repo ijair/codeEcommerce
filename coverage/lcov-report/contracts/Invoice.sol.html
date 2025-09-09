@@ -1,0 +1,1139 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for contracts/Invoice.sol</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../prettify.css" />
+    <link rel="stylesheet" href="../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../index.html">all files</a> / <a href="index.html">contracts/</a> Invoice.sol
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">78.38% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>29/37</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">31.25% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>20/64</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">62.5% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>10/16</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">82.76% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>48/58</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line medium'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252
+253
+254
+255
+256
+257
+258
+259
+260
+261
+262
+263
+264
+265
+266
+267
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294
+295
+296
+297
+298
+299
+300
+301
+302
+303
+304
+305
+306
+307
+308
+309
+310
+311
+312
+313
+314
+315
+316
+317
+318
+319
+320
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334
+335
+336
+337
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355
+356
+357
+358
+359</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-yes">4×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1×</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+&nbsp;
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "./AuthorizedContract.sol";
+&nbsp;
+/**
+ * @title Invoice
+ * @dev Contract representing an invoice in the e-commerce platform
+ * Each factura is defined by company address, number, date, client address, and total amount
+ */
+contract Invoice is AuthorizedContract, ReentrancyGuard {
+    constructor() Ownable(msg.sender) {}
+    // Struct to represent an invoice item
+    struct InvoiceItem {
+        uint256 productId;
+        string productName;
+        uint256 quantity;
+        uint256 unitPrice;
+        uint256 totalPrice;
+    }
+    
+    // Struct to represent an invoice
+    struct InvoiceData {
+        address companyAddress;
+        uint256 number;
+        uint256 date;
+        address clientAddress;
+        uint256 incomeTotal;
+        InvoiceItem[] items;
+        bool isPaid;
+        bool isCancelled;
+        uint256 paymentDate;
+        string paymentMethod;
+    }
+    
+    // Mapping from company address to mapping of invoice number to invoice data
+    mapping(address =&gt; mapping(uint256 =&gt; InvoiceData)) public invoices;
+    
+    // Mapping from company address to array of invoice numbers
+    mapping(address =&gt; uint256[]) public companyInvoices;
+    
+    // Mapping from client address to array of invoice numbers (across all companies)
+    mapping(address =&gt; uint256[]) public clientInvoices;
+    
+    // Global invoice counter for unique numbers across all companies
+    uint256 public globalInvoiceCounter;
+    
+    // Mapping to check if an invoice exists
+    mapping(address =&gt; mapping(uint256 =&gt; bool)) public invoiceExists;
+    
+    // Events
+    event InvoiceCreated(
+        address indexed companyAddress,
+        uint256 indexed number,
+        address indexed clientAddress,
+        uint256 incomeTotal,
+        uint256 fecha
+    );
+    event InvoicePaid(
+        address indexed companyAddress,
+        uint256 indexed number,
+        address indexed clientAddress,
+        uint256 incomeTotal,
+        uint256 paymentDate
+    );
+    event InvoiceCancelled(
+        address indexed companyAddress,
+        uint256 indexed number,
+        address indexed clientAddress
+    );
+    event InvoiceItemAdded(
+        address indexed companyAddress,
+        uint256 indexed number,
+        uint256 productId,
+        uint256 quantity,
+        uint256 unitPrice,
+        uint256 totalPrice
+    );
+    
+    // Modifiers
+    modifier onlyValidCompany(address companyAddress) {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(companyAddress != address(0), "Invoice: Invalid company address");
+        _;
+    }
+    
+    modifier onlyValidClient(address clientAddress) {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(clientAddress != address(0), "Invoice: Invalid client address");
+        _;
+    }
+    
+    modifier onlyExistingInvoice(address companyAddress, uint256 number) {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(invoiceExists[companyAddress][number], "Invoice: Invoice does not exist");
+        _;
+    }
+    
+    modifier onlyUnpaidInvoice(address companyAddress, uint256 number) {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(
+            !invoices[companyAddress][number].isPaid,
+            "Invoice: Invoice is already paid"
+        );
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(
+            !invoices[companyAddress][number].isCancelled,
+            "Invoice: Invoice is cancelled"
+        );
+        _;
+    }
+    
+    
+    /**
+     * @dev Create a new invoice
+     * @param companyAddress Address of the company
+     * @param clientAddress Address of the client
+     * @param items Array of invoice items
+     * @return invoiceNumber The number of the created invoice
+     */
+    function createInvoice(
+        address companyAddress,
+        address clientAddress,
+        InvoiceItem[] memory items
+    ) 
+        external 
+        <span class="missing-if-branch" title="else path not taken" >E</span>onlyValidCompany(companyAddress) 
+        <span class="missing-if-branch" title="else path not taken" >E</span>onlyValidClient(clientAddress) 
+        <span class="missing-if-branch" title="else path not taken" >E</span>onlyAuthorized
+        <span class="missing-if-branch" title="else path not taken" >E</span>nonReentrant 
+        returns (uint256 invoiceNumber) 
+    {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(items.length &gt; 0, "Invoice: Invoice must have at least one item");
+        
+        // Generate unique invoice number
+        invoiceNumber = ++globalInvoiceCounter;
+        
+        // Calculate total amount
+        uint256 totalAmount = 0;
+        for (uint256 i = 0; i &lt; items.length; i++) {
+            <span class="missing-if-branch" title="else path not taken" >E</span>require(items[i].quantity &gt; 0, "Invoice: Item quantity must be greater than 0");
+            <span class="missing-if-branch" title="else path not taken" >E</span>require(items[i].unitPrice &gt; 0, "Invoice: Item unit price must be greater than 0");
+            <span class="missing-if-branch" title="else path not taken" >E</span>require(
+                items[i].totalPrice == items[i].quantity * items[i].unitPrice,
+                "Invoice: Item total price calculation is incorrect"
+            );
+            totalAmount += items[i].totalPrice;
+        }
+        
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(totalAmount &gt; 0, "Invoice: Total amount must be greater than 0");
+        
+        // Create invoice data
+        InvoiceData storage newInvoice = invoices[companyAddress][invoiceNumber];
+        newInvoice.companyAddress = companyAddress;
+        newInvoice.number = invoiceNumber;
+        newInvoice.date = block.timestamp;
+        newInvoice.clientAddress = clientAddress;
+        newInvoice.incomeTotal = totalAmount;
+        newInvoice.isPaid = false;
+        newInvoice.isCancelled = false;
+        newInvoice.paymentDate = 0;
+        newInvoice.paymentMethod = "";
+        
+        // Add items to invoice
+        for (uint256 i = 0; i &lt; items.length; i++) {
+            newInvoice.items.push(items[i]);
+            emit InvoiceItemAdded(
+                companyAddress,
+                invoiceNumber,
+                items[i].productId,
+                items[i].quantity,
+                items[i].unitPrice,
+                items[i].totalPrice
+            );
+        }
+        
+        // Update mappings
+        companyInvoices[companyAddress].push(invoiceNumber);
+        clientInvoices[clientAddress].push(invoiceNumber);
+        invoiceExists[companyAddress][invoiceNumber] = true;
+        
+        emit InvoiceCreated(companyAddress, invoiceNumber, clientAddress, totalAmount, block.timestamp);
+        return invoiceNumber;
+    }
+    
+    /**
+     * @dev Mark an invoice as paid
+     * @param companyAddress Address of the company
+     * @param number Invoice number
+     * @param paymentMethod Payment method used
+     */
+    function markAsPaid(
+        address companyAddress,
+        uint256 number,
+        string memory paymentMethod
+    ) 
+        external 
+        <span class="missing-if-branch" title="else path not taken" >E</span>onlyValidCompany(companyAddress) 
+        <span class="missing-if-branch" title="else path not taken" >E</span>onlyExistingInvoice(companyAddress, number) 
+        <span class="missing-if-branch" title="else path not taken" >E</span>onlyUnpaidInvoice(companyAddress, number) 
+    {
+        <span class="missing-if-branch" title="else path not taken" >E</span>require(bytes(paymentMethod).length &gt; 0, "Invoice: Payment method cannot be empty");
+        
+        InvoiceData storage invoice = invoices[companyAddress][number];
+        invoice.isPaid = true;
+        invoice.paymentDate = block.timestamp;
+        invoice.paymentMethod = paymentMethod;
+        
+        emit InvoicePaid(companyAddress, number, invoice.clientAddress, invoice.incomeTotal, block.timestamp);
+    }
+    
+    /**
+     * @dev Cancel an invoice
+     * @param companyAddress Address of the company
+     * @param number Invoice number
+     */
+<span class="fstat-no" title="function not covered" >    function cancelInvoice(</span>
+        address companyAddress,
+        uint256 number
+    ) 
+        external 
+        onlyValidCompany(companyAddress) 
+        onlyExistingInvoice(companyAddress, number) 
+        onlyUnpaidInvoice(companyAddress, number) 
+    {
+<span class="cstat-no" title="statement not covered" >        InvoiceData storage invoice = invoices[companyAddress][number];</span>
+        invoice.isCancelled = true;
+        
+<span class="cstat-no" title="statement not covered" >        emit InvoiceCancelled(companyAddress, number, invoice.clientAddress);</span>
+    }
+    
+    /**
+     * @dev Get invoice data
+     * @param companyAddress Address of the company
+     * @param number Invoice number
+     * @return InvoiceData struct containing all invoice information
+     */
+<span class="fstat-no" title="function not covered" >    function getInvoiceData(</span>
+        address companyAddress,
+        uint256 number
+    ) 
+        external 
+        view 
+        onlyValidCompany(companyAddress) 
+        onlyExistingInvoice(companyAddress, number) 
+        returns (InvoiceData memory) 
+    {
+<span class="cstat-no" title="statement not covered" >        return invoices[companyAddress][number];</span>
+    }
+    
+    /**
+     * @dev Get invoice items
+     * @param companyAddress Address of the company
+     * @param number Invoice number
+     * @return Array of invoice items
+     */
+<span class="fstat-no" title="function not covered" >    function getInvoiceItems(</span>
+        address companyAddress,
+        uint256 number
+    ) 
+        external 
+        view 
+        onlyValidCompany(companyAddress) 
+        onlyExistingInvoice(companyAddress, number) 
+        returns (InvoiceItem[] memory) 
+    {
+<span class="cstat-no" title="statement not covered" >        return invoices[companyAddress][number].items;</span>
+    }
+    
+    /**
+     * @dev Get all invoice numbers for an company
+     * @param companyAddress Address of the company
+     * @return Array of invoice numbers
+     */
+<span class="fstat-no" title="function not covered" >    function getCompanyInvoices(address companyAddress) </span>
+        external 
+        view 
+        onlyValidCompany(companyAddress) 
+        returns (uint256[] memory) 
+    {
+<span class="cstat-no" title="statement not covered" >        return companyInvoices[companyAddress];</span>
+    }
+    
+    /**
+     * @dev Get all invoice numbers for a client
+     * @param clientAddress Address of the client
+     * @return Array of invoice numbers
+     */
+<span class="fstat-no" title="function not covered" >    function getClientInvoices(address clientAddress) </span>
+        external 
+        view 
+        onlyValidClient(clientAddress) 
+        returns (uint256[] memory) 
+    {
+<span class="cstat-no" title="statement not covered" >        return clientInvoices[clientAddress];</span>
+    }
+    
+    /**
+     * @dev Get invoice count for an company
+     * @param companyAddress Address of the company
+     * @return Number of invoices
+     */
+    function getInvoiceCount(address companyAddress) 
+        external 
+        view 
+        <span class="missing-if-branch" title="else path not taken" >E</span>onlyValidCompany(companyAddress) 
+        returns (uint256) 
+    {
+        return companyInvoices[companyAddress].length;
+    }
+    
+    /**
+     * @dev Get total revenue for an company
+     * @param companyAddress Address of the company
+     * @return Total revenue from paid invoices
+     */
+    function getTotalRevenue(address companyAddress) 
+        external 
+        view 
+        <span class="missing-if-branch" title="else path not taken" >E</span>onlyValidCompany(companyAddress) 
+        returns (uint256) 
+    {
+        uint256 total = 0;
+        uint256[] memory invoiceNumbers = companyInvoices[companyAddress];
+        
+        for (uint256 i = 0; i &lt; invoiceNumbers.length; i++) {
+<span class="cstat-no" title="statement not covered" >            if (invoices[companyAddress][invoiceNumbers[i]].isPaid) {</span>
+                total += invoices[companyAddress][invoiceNumbers[i]].incomeTotal;
+            }
+        }
+        
+        return total;
+    }
+    
+    /**
+     * @dev Check if an invoice is paid
+     * @param companyAddress Address of the company
+     * @param number Invoice number
+     * @return True if invoice is paid, false otherwise
+     */
+<span class="fstat-no" title="function not covered" >    function isInvoicePaid(</span>
+        address companyAddress,
+        uint256 number
+    ) 
+        external 
+        view 
+        onlyValidCompany(companyAddress) 
+        onlyExistingInvoice(companyAddress, number) 
+        returns (bool) 
+    {
+<span class="cstat-no" title="statement not covered" >        return invoices[companyAddress][number].isPaid;</span>
+    }
+    
+    /**
+     * @dev Get total number of invoices across all companies
+     * @return Total count of invoices
+     */
+    function getTotalInvoices() external view returns (uint256) {
+        return globalInvoiceCounter;
+    }
+    
+}
+&nbsp;</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Tue Sep 09 2025 14:42:19 GMT-0500 (Eastern Standard Time)
+</div>
+</div>
+<script src="../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../sorter.js"></script>
+</body>
+</html>

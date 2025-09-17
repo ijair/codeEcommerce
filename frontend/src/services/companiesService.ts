@@ -32,22 +32,16 @@ class CompaniesService {
    */
   async getAllCompanies(): Promise<CompanyData[]> {
     try {
-      console.log('CompaniesService: Getting all companies...');
       const companyContract = contractService.getContract('company');
-      console.log('CompaniesService: Company contract:', companyContract ? 'available' : 'null');
       
       if (!companyContract) {
         throw new Error('Company contract not available');
       }
 
-      console.log('CompaniesService: Calling getAllCompanies...');
       const companies = await companyContract.getAllCompanies();
-      console.log('CompaniesService: Raw companies from contract:', companies);
-      console.log('CompaniesService: Number of companies:', companies.length);
       
       // The contract returns CompanyData[] without IDs, so we need to add them manually
       const formatted = this.formatCompaniesArrayWithIds(companies);
-      console.log('CompaniesService: Formatted companies:', formatted);
       
       return formatted;
     } catch (error: any) {

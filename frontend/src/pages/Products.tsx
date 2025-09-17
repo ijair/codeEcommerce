@@ -54,9 +54,8 @@ const Products: React.FC = () => {
   };
 
   const handleCheckout = () => {
-    setShowCart(false);
-    // Navigate to checkout page or show checkout modal
-    alert('Checkout functionality coming soon!');
+    // This will be handled by the ShoppingCart component itself
+    console.log('Checkout completed successfully');
   };
 
   if (!isConnected) {

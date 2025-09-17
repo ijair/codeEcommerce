@@ -1,11 +1,11 @@
 // Auto-generated contract addresses from deployment
 export const CONTRACT_ADDRESSES = {
   local: {
-    ITCToken20: '0xc3e53F4d16Ae77Db1c982e75a937B9f60FE63690',
-    Company: '0x84eA74d481Ee0A5332c457a4d796187F6Ba67fEB',
-    Products: '0x9E545E3C0baAB3E08CdfD552C960A1050f373042',
-    Invoice: '0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8',
-    Clients: '0xa82fF9aFd8f496c3d6ac40E2a0F282E47488CFc9',
+    ITCToken20: '0xCD8a1C3ba11CF5ECfa6267617243239504a98d90',
+    Company: '0x82e01223d51Eb87e16A03E24687EDF0F294da6f1',
+    Products: '0x2bdCC0de6bE1f7D2ee689a0342D76F52E8EFABa3',
+    Invoice: '0x7bc06c482DEAd17c0e297aFbC32f6e63d3846650',
+    Clients: '0x7969c5eD335650692Bc04293B07F5BF2e7A673C0',
   },
   sepolia: {
     ITCToken20: '',

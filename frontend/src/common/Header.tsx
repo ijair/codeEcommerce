@@ -56,6 +56,9 @@ const Header: React.FC = () => {
             <a href="/withdraw" className="text-gray-700 hover:text-primary-600 font-medium">
               Withdraw
             </a>
+            <a href="/purchases" className="text-gray-700 hover:text-primary-600 font-medium">
+              My Purchases
+            </a>
             {isAdmin && (
               <a href="/dashboard" className="text-gray-700 hover:text-primary-600 font-medium">
                 Dashboard

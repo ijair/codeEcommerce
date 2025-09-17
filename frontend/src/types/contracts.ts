@@ -122,3 +122,39 @@ export interface WalletState {
   network: NetworkConfig | null;
   error: string | null;
 }
+
+// Additional Invoice Types
+export interface InvoiceData {
+  id: number;
+  companyId: number;
+  number: number;
+  date: number;
+  clientAddress: string;
+  totalAmount: string;
+  totalAmountFormatted: string;
+  isPaid: boolean;
+  createdAt: number;
+  updatedAt: number;
+  items?: InvoiceItem[];
+}
+
+export interface CheckoutResult {
+  success: boolean;
+  invoiceId?: string;
+  transactionHash?: string;
+  totalAmount?: string;
+  message?: string;
+  error?: string;
+}
+
+export interface CompanyResult {
+  success: boolean;
+  data?: CompanyData;
+  error?: string;
+}
+
+export interface ProductResult {
+  success: boolean;
+  data?: ProductData;
+  error?: string;
+}

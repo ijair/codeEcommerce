@@ -269,7 +269,7 @@ const TokenPurchase: React.FC = () => {
                     ITC Tokens
                   </label>
                   <div className="text-lg font-semibold text-primary-600">
-                    {parseFloat(balances.balanceFormatted).toFixed(4)} ITC
+                    {parseFloat(balances.balanceFormatted).toFixed(2)} ITC
                   </div>
                 </div>
                 <div>
@@ -277,7 +277,7 @@ const TokenPurchase: React.FC = () => {
                     ETH Balance
                   </label>
                   <div className="text-lg font-semibold text-gray-900">
-                    {parseFloat(balances.ethBalanceFormatted).toFixed(4)} ETH
+                    {parseFloat(balances.ethBalanceFormatted).toFixed(2)} ETH
                   </div>
                 </div>
               </div>

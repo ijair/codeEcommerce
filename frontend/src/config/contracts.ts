@@ -1,0 +1,20 @@
+// Auto-generated contract addresses from deployment
+export const CONTRACT_ADDRESSES = {
+  local: {
+    ITCToken20: '0xc3e53F4d16Ae77Db1c982e75a937B9f60FE63690',
+    Company: '0x84eA74d481Ee0A5332c457a4d796187F6Ba67fEB',
+    Products: '0x9E545E3C0baAB3E08CdfD552C960A1050f373042',
+    Invoice: '0x1613beB3B2C4f22Ee086B2b38C1476A3cE7f78E8',
+    Clients: '0xa82fF9aFd8f496c3d6ac40E2a0F282E47488CFc9',
+  },
+  sepolia: {
+    ITCToken20: '',
+    Company: '',
+    Products: '',
+    Invoice: '',
+    Clients: '',
+  },
+};
+
+export const DEPLOYER_ADDRESS = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266';
+export const RPC_URL = 'http://127.0.0.1:8545';

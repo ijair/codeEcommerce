@@ -482,4 +482,57 @@ contract ProductsTest is Test {
         assertEq(productData.price, newPrice);
         assertEq(productData.image, newImage);
     }
+
+    // ===== NEW TESTS FOR PURCHASE FUNCTION =====
+
+    function testPurchaseProduct() public {
+        uint256 companyId = company.createCompany("Test Company");
+        uint256 productId = products.createProduct(companyId, "Test Product", 1 ether, "QmHash", 100);
+        
+        uint256 initialStock = products.getProductStock(productId);
+        uint256 purchaseQuantity = 5;
+        
+        // Anyone can purchase a product (reduce stock)
+        vm.prank(user1);
+        products.purchaseProduct(productId, purchaseQuantity);
+        
+        uint256 finalStock = products.getProductStock(productId);
+        assertEq(finalStock, initialStock - purchaseQuantity);
+    }
+
+    function testPurchaseProductInsufficientStock() public {
+        uint256 companyId = company.createCompany("Test Company");
+        uint256 productId = products.createProduct(companyId, "Test Product", 1 ether, "QmHash", 5);
+        
+        vm.prank(user1);
+        vm.expectRevert("Products: Insufficient stock");
+        products.purchaseProduct(productId, 10); // Try to buy more than available
+    }
+
+    function testPurchaseProductInactiveProduct() public {
+        uint256 companyId = company.createCompany("Test Company");
+        uint256 productId = products.createProduct(companyId, "Test Product", 1 ether, "QmHash", 100);
+        
+        // Deactivate the product
+        products.deactivateProduct(productId);
+        
+        vm.prank(user1);
+        vm.expectRevert("Products: Product is not active");
+        products.purchaseProduct(productId, 1);
+    }
+
+    function testPurchaseProductNonExistent() public {
+        vm.prank(user1);
+        vm.expectRevert("Products: Product does not exist");
+        products.purchaseProduct(999, 1);
+    }
+
+    function testPurchaseProductZeroQuantity() public {
+        uint256 companyId = company.createCompany("Test Company");
+        uint256 productId = products.createProduct(companyId, "Test Product", 1 ether, "QmHash", 100);
+        
+        vm.prank(user1);
+        vm.expectRevert("Products: Quantity must be greater than zero");
+        products.purchaseProduct(productId, 0);
+    }
 }

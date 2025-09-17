@@ -20,7 +20,7 @@ contract ITCToken20 is ERC20, Ownable, ReentrancyGuard, IITCToken20 {
     uint256 public constant MAX_SUPPLY = 1_000_000 * 10**18; // 1 million tokens
     
     // Stripe fee configuration
-    uint256 public stripeFixedFee = 0.30 ether; // $0.30 fixed fee (assuming 1 ETH = $1000)
+    uint256 public stripeFixedFee = 0.0001 ether; // $0.30 fixed fee (assuming 1 ETH = $3000)
     uint256 public stripePercentageFee = 290; // 2.9% in basis points (290/10000)
     
     // Gas fee estimate for transactions
@@ -49,12 +49,14 @@ contract ITCToken20 is ERC20, Ownable, ReentrancyGuard, IITCToken20 {
      */
     function buyTokens(uint256 amount) external payable override nonReentrant {
         require(amount > 0, "ITCToken20: Amount must be greater than zero");
-        require(msg.value >= amount * tokenPrice, "ITCToken20: Insufficient ETH sent");
         
-        uint256 totalCost = amount * tokenPrice;
+        // amount is in wei (18 decimals), so we need to calculate cost properly
+        uint256 totalCost = (amount * tokenPrice) / 1e18;
+        require(msg.value >= totalCost, "ITCToken20: Insufficient ETH sent");
+        
         uint256 change = msg.value - totalCost;
         
-        // Check if we have enough tokens to sell
+        // Check if we have enough tokens to sell (amount is already in wei with 18 decimals)
         require(totalSupply() + amount <= MAX_SUPPLY, "ITCToken20: Exceeds maximum supply");
         
         // Mint tokens to the buyer
@@ -76,9 +78,10 @@ contract ITCToken20 is ERC20, Ownable, ReentrancyGuard, IITCToken20 {
     function withdrawTokens(uint256 amount) external override nonReentrant {
         require(amount > 0, "ITCToken20: Amount must be greater than zero");
         require(balanceOf(msg.sender) >= amount, "ITCToken20: Insufficient token balance");
-        require(address(this).balance >= amount * tokenPrice, "ITCToken20: Insufficient contract balance");
         
-        uint256 ethAmount = amount * tokenPrice;
+        // amount is in wei (18 decimals), so we need to calculate ETH amount properly
+        uint256 ethAmount = (amount * tokenPrice) / 1e18;
+        require(address(this).balance >= ethAmount, "ITCToken20: Insufficient contract balance");
         
         // Burn tokens from the user
         _burn(msg.sender, amount);
@@ -199,7 +202,9 @@ contract ITCToken20 is ERC20, Ownable, ReentrancyGuard, IITCToken20 {
     function calculateBuyTokensCost(uint256 tokenAmount) external view override returns (uint256 totalCost, uint256 stripeFee, uint256 gasFee) {
         require(tokenAmount > 0, "ITCToken20: Token amount must be greater than zero");
         
-        uint256 tokenCost = tokenAmount * tokenPrice;
+        // tokenAmount is in wei (18 decimals), tokenPrice is in wei per token
+        // So tokenCost = (tokenAmount / 1e18) * tokenPrice = tokenAmount * tokenPrice / 1e18
+        uint256 tokenCost = (tokenAmount * tokenPrice) / 1e18;
         
         // Calculate Stripe fees: fixed fee + percentage fee
         stripeFee = stripeFixedFee + (tokenCost * stripePercentageFee) / 10000;
@@ -223,7 +228,8 @@ contract ITCToken20 is ERC20, Ownable, ReentrancyGuard, IITCToken20 {
     function calculateWithdrawTokensNet(uint256 tokenAmount) external view override returns (uint256 netAmount, uint256 stripeFee, uint256 gasFee) {
         require(tokenAmount > 0, "ITCToken20: Token amount must be greater than zero");
         
-        uint256 grossAmount = tokenAmount * tokenPrice;
+        // tokenAmount is in wei (18 decimals), tokenPrice is in wei per token
+        uint256 grossAmount = (tokenAmount * tokenPrice) / 1e18;
         
         // Calculate Stripe fees for withdrawal
         stripeFee = stripeFixedFee + (grossAmount * stripePercentageFee) / 10000;

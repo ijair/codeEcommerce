@@ -190,7 +190,8 @@ contract Invoice is Ownable, IInvoice {
             );
             
             // Transfer tokens from client to company owner
-            tokenContract.transferFrom(clientAddress, company.owner, totalAmount);
+            bool transferSuccess = tokenContract.transferFrom(clientAddress, company.owner, totalAmount);
+            require(transferSuccess, "Invoice: Token transfer failed");
         }
         
         // Create invoice

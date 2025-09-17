@@ -64,7 +64,8 @@ contract ITCToken20 is ERC20, Ownable, ReentrancyGuard, IITCToken20 {
         
         // Refund excess ETH
         if (change > 0) {
-            payable(msg.sender).transfer(change);
+            (bool refundSuccess, ) = payable(msg.sender).call{value: change}("");
+            require(refundSuccess, "ITCToken20: ETH refund failed");
         }
         
         emit TokensPurchased(msg.sender, amount, totalCost);
@@ -87,7 +88,8 @@ contract ITCToken20 is ERC20, Ownable, ReentrancyGuard, IITCToken20 {
         _burn(msg.sender, amount);
         
         // Transfer ETH to the user
-        payable(msg.sender).transfer(ethAmount);
+        (bool withdrawSuccess, ) = payable(msg.sender).call{value: ethAmount}("");
+        require(withdrawSuccess, "ITCToken20: ETH withdrawal failed");
         
         emit TokensWithdrawn(msg.sender, amount, ethAmount);
     }
@@ -124,7 +126,8 @@ contract ITCToken20 is ERC20, Ownable, ReentrancyGuard, IITCToken20 {
      */
     function withdrawETH(uint256 amount) external onlyOwner {
         require(amount <= address(this).balance, "ITCToken20: Insufficient contract balance");
-        payable(owner()).transfer(amount);
+        (bool success, ) = payable(owner()).call{value: amount}("");
+        require(success, "ITCToken20: ETH withdrawal failed");
     }
 
     /**
@@ -133,7 +136,8 @@ contract ITCToken20 is ERC20, Ownable, ReentrancyGuard, IITCToken20 {
     function withdrawAllETH() external onlyOwner {
         uint256 balance = address(this).balance;
         require(balance > 0, "ITCToken20: No ETH to withdraw");
-        payable(owner()).transfer(balance);
+        (bool success, ) = payable(owner()).call{value: balance}("");
+        require(success, "ITCToken20: ETH withdrawal failed");
     }
 
     /**

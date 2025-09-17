@@ -10,7 +10,17 @@ cache
 
 # Hardhat
 cache
-artifacts
 
-# Other
-.DS_Store
+# Backend
+backend/artifacts
+backend/cache
+backend/out
+
+
+# SetupTestData
+backend/setup_test_data.sh
+
+
+# Frontend
+frontend/node_modules
+

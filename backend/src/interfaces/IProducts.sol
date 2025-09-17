@@ -90,6 +90,13 @@ interface IProducts {
     event ProductReactivated(uint256 indexed productId);
 
     /**
+     * @dev Emitted when product stock is updated
+     * @param productId Unique identifier for the product
+     * @param newStock New stock level
+     */
+    event ProductStockUpdated(uint256 indexed productId, uint256 newStock);
+
+    /**
      * @dev Create a new product
      * @param companyId ID of the company that owns the product
      * @param name Name of the product
@@ -220,6 +227,13 @@ interface IProducts {
      * @return stock Current stock level
      */
     function getProductStock(uint256 productId) external view returns (uint256 stock);
+
+    /**
+     * @dev Purchase product - reduces stock and can be called by anyone
+     * @param productId Unique identifier for the product
+     * @param quantity Quantity to purchase
+     */
+    function purchaseProduct(uint256 productId, uint256 quantity) external;
 
     /**
      * @dev Check if product has sufficient stock

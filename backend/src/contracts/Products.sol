@@ -480,6 +480,26 @@ contract Products is Ownable, IProducts {
     }
 
     /**
+     * @dev Purchase product - reduces stock and can be called by anyone
+     * @param productId Unique identifier for the product
+     * @param quantity Quantity to purchase
+     * @dev This function allows anyone to reduce stock when making a purchase
+     * @dev It's designed to be called during the purchase process
+     */
+    function purchaseProduct(uint256 productId, uint256 quantity) external {
+        require(productExists(productId), "Products: Product does not exist");
+        require(products[productId].isActive, "Products: Product is not active");
+        require(quantity > 0, "Products: Quantity must be greater than zero");
+        require(products[productId].stock >= quantity, "Products: Insufficient stock");
+        
+        // Reduce stock
+        products[productId].stock -= quantity;
+        products[productId].updatedAt = block.timestamp;
+        
+        emit ProductStockUpdated(productId, products[productId].stock);
+    }
+
+    /**
      * @dev Get product stock
      * @param productId Unique identifier for the product
      * @return stock Current stock level

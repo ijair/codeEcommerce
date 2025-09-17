@@ -80,18 +80,18 @@ contract ITCToken20 is ERC20, Ownable, ReentrancyGuard, IITCToken20 {
         require(amount > 0, "ITCToken20: Amount must be greater than zero");
         require(balanceOf(msg.sender) >= amount, "ITCToken20: Insufficient token balance");
         
-        // amount is in wei (18 decimals), so we need to calculate ETH amount properly
-        uint256 ethAmount = (amount * tokenPrice) / 1e18;
-        require(address(this).balance >= ethAmount, "ITCToken20: Insufficient contract balance");
+        // Calculate net amount after fees using the calculation function
+        (uint256 netAmount, , ) = this.calculateWithdrawTokensNet(amount);
+        require(address(this).balance >= netAmount, "ITCToken20: Insufficient contract balance");
         
         // Burn tokens from the user
         _burn(msg.sender, amount);
         
-        // Transfer ETH to the user
-        (bool withdrawSuccess, ) = payable(msg.sender).call{value: ethAmount}("");
+        // Transfer net ETH to the user (after fees)
+        (bool withdrawSuccess, ) = payable(msg.sender).call{value: netAmount}("");
         require(withdrawSuccess, "ITCToken20: ETH withdrawal failed");
         
-        emit TokensWithdrawn(msg.sender, amount, ethAmount);
+        emit TokensWithdrawn(msg.sender, amount, netAmount);
     }
 
     /**

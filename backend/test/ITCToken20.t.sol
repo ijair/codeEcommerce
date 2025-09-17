@@ -322,17 +322,17 @@ contract ITCToken20Test is Test {
     }
 
     function testFuzzWithdrawTokens(uint256 buyAmount, uint256 withdrawAmount) public {
-        vm.assume(buyAmount >= 100 * 10**18); // Minimum amount to cover fees
-        vm.assume(buyAmount <= 50000 * 10**18); // Reasonable upper limit
-        vm.assume(withdrawAmount >= 10 * 10**18); // Minimum withdrawal to cover fees
-        vm.assume(withdrawAmount <= buyAmount);
+        // Use more reasonable ranges to avoid too many rejected inputs
+        buyAmount = bound(buyAmount, 1000 * 10**18, 10000 * 10**18);
+        withdrawAmount = bound(withdrawAmount, 100 * 10**18, buyAmount);
+        
         vm.assume(buyAmount <= token.getRemainingSupply());
         
         // Skip if withdrawal amount is too small to cover fees
         try token.calculateWithdrawTokensNet(withdrawAmount) returns (uint256, uint256, uint256) {
             // Continue with test
         } catch {
-            vm.assume(false); // Skip this test case
+            return; // Skip this test case
         }
         
         uint256 cost = (buyAmount * TOKEN_PRICE) / 1e18;

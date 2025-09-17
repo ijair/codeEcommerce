@@ -51,9 +51,7 @@ class ProductsService {
    */
   async getAllProducts(): Promise<ProductData[]> {
     try {
-      console.log('ProductsService: Getting all products...');
       const productsContract = contractService.getContract('products');
-      console.log('ProductsService: Products contract:', productsContract ? 'available' : 'null');
       
       if (!productsContract) {
         throw new Error('Products contract not available');
@@ -61,11 +59,8 @@ class ProductsService {
 
       console.log('ProductsService: Calling getAllProducts...');
       const products = await productsContract.getAllProducts();
-      console.log('ProductsService: Raw products from contract:', products);
-      console.log('ProductsService: Number of products:', products.length);
       
       const formatted = this.formatProductsArray(products);
-      console.log('ProductsService: Formatted products:', formatted);
       
       return formatted;
     } catch (error: any) {

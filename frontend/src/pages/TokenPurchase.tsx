@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useWallet } from '../hooks/useWallet';
 import { useTokens } from '../hooks/useTokens';
 import { stripeService, type PaymentMethodData } from '../services/stripeService';
@@ -21,6 +21,7 @@ const TokenPurchase: React.FC = () => {
   const [isCalculating, setIsCalculating] = useState(false);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [lastCalculatedAmount, setLastCalculatedAmount] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethodData>({
     cardNumber: '',
     expiryMonth: '',
@@ -40,15 +41,25 @@ const TokenPurchase: React.FC = () => {
     setHasCalculatedCost(false);
     setShowPaymentForm(false);
     setSuccessMessage('');
+    setLastCalculatedAmount('');
   }, [address]);
 
-  // Calculate cost when token amount changes
+  // Calculate cost when token amount changes (optimized to prevent constant recalculation)
   useEffect(() => {
     const calculateCost = async () => {
+      // Skip calculation if amount hasn't changed or is invalid
       if (!tokenAmount || parseFloat(tokenAmount) <= 0) {
-        setCostInfo(null);
-        setInsufficientFunds(false);
-        setHasCalculatedCost(false);
+        if (costInfo !== null) {
+          setCostInfo(null);
+          setInsufficientFunds(false);
+          setHasCalculatedCost(false);
+          setLastCalculatedAmount('');
+        }
+        return;
+      }
+
+      // Skip calculation if we already calculated for this amount
+      if (tokenAmount === lastCalculatedAmount && costInfo) {
         return;
       }
 
@@ -57,6 +68,7 @@ const TokenPurchase: React.FC = () => {
         const cost = await calculateBuyTokensCost(tokenAmount);
         setCostInfo(cost);
         setHasCalculatedCost(true);
+        setLastCalculatedAmount(tokenAmount);
         
         // Check if user has enough ETH only if we have both balances and cost info
         if (balances && cost && balances.ethBalance && cost.totalCost) {
@@ -71,14 +83,38 @@ const TokenPurchase: React.FC = () => {
         setCostInfo(null);
         setInsufficientFunds(false);
         setHasCalculatedCost(false);
+        setLastCalculatedAmount('');
       } finally {
         setIsCalculating(false);
       }
     };
 
-    const debounceTimer = setTimeout(calculateCost, 500);
+    // Longer debounce to reduce calculation frequency
+    const debounceTimer = setTimeout(calculateCost, 800);
     return () => clearTimeout(debounceTimer);
-  }, [tokenAmount, balances, calculateBuyTokensCost]);
+  }, [tokenAmount, calculateBuyTokensCost]); // Removed balances from dependencies to prevent constant recalculation
+
+  // Separate effect to check insufficient funds when balance changes (without recalculating cost)
+  useEffect(() => {
+    if (balances && costInfo && costInfo.totalCost) {
+      const userEthBalance = BigInt(balances.ethBalance);
+      const requiredEth = BigInt(costInfo.totalCost);
+      setInsufficientFunds(userEthBalance < requiredEth);
+    }
+  }, [balances, costInfo]); // Only check funds when balance or cost changes
+
+  // Memoize cost calculations to prevent unnecessary re-renders
+  const memoizedCostDisplay = useMemo(() => {
+    if (!costInfo) return null;
+    
+    return {
+      baseCost: (parseFloat(costInfo.totalCost) / 1e18 - parseFloat(costInfo.stripeFee) / 1e18 - parseFloat(costInfo.gasFee) / 1e18).toFixed(6),
+      stripeFee: (parseFloat(costInfo.stripeFee) / 1e18).toFixed(6),
+      gasFee: (parseFloat(costInfo.gasFee) / 1e18).toFixed(6),
+      totalCost: (parseFloat(costInfo.totalCost) / 1e18).toFixed(6),
+      eurAmount: stripeService.formatEur(stripeService.convertEthToEur(parseFloat(costInfo.totalCost) / 1e18))
+    };
+  }, [costInfo]);
 
   const handleTokenAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -320,44 +356,75 @@ const TokenPurchase: React.FC = () => {
                     Cost Breakdown
                   </h4>
                   
-                  {isCalculating ? (
-                    <div className="animate-pulse space-y-2">
-                      <div className="h-4 bg-gray-200 rounded w-full"></div>
-                      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                      <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                    </div>
-                  ) : costInfo ? (
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span>Token Amount:</span>
-                        <span className="font-medium">{tokenAmount} ITC</span>
+                  {/* Always show the container to prevent layout shifts */}
+                  <div className="space-y-2 text-sm min-h-[120px]">
+                    {isCalculating ? (
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span>Calculating...</span>
+                          <div className="w-4 h-4 border-2 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+                        </div>
+                        {/* Show previous values while calculating to prevent flashing */}
+                        {memoizedCostDisplay && (
+                          <div className="opacity-50 space-y-2">
+                            <div className="flex justify-between">
+                              <span>Token Amount:</span>
+                              <span className="font-medium">{lastCalculatedAmount} ITC</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Base Cost:</span>
+                              <span>{memoizedCostDisplay.baseCost} ETH</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Stripe Fee:</span>
+                              <span>{memoizedCostDisplay.stripeFee} ETH</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span>Gas Fee:</span>
+                              <span>{memoizedCostDisplay.gasFee} ETH</span>
+                            </div>
+                            <div className="border-t pt-2 flex justify-between font-semibold">
+                              <span>Total Cost:</span>
+                              <span className="text-primary-600">{memoizedCostDisplay.totalCost} ETH</span>
+                            </div>
+                          </div>
+                        )}
                       </div>
-                      <div className="flex justify-between">
-                        <span>Base Cost:</span>
-                        <span>{(parseFloat(costInfo.totalCost) / 1e18 - parseFloat(costInfo.stripeFee) / 1e18 - parseFloat(costInfo.gasFee) / 1e18).toFixed(6)} ETH</span>
+                    ) : memoizedCostDisplay ? (
+                      <div className="space-y-2">
+                        <div className="flex justify-between">
+                          <span>Token Amount:</span>
+                          <span className="font-medium">{tokenAmount} ITC</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Base Cost:</span>
+                          <span>{memoizedCostDisplay.baseCost} ETH</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Stripe Fee:</span>
+                          <span>{memoizedCostDisplay.stripeFee} ETH</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Gas Fee:</span>
+                          <span>{memoizedCostDisplay.gasFee} ETH</span>
+                        </div>
+                        <div className="border-t pt-2 flex justify-between font-semibold">
+                          <span>Total Cost:</span>
+                          <span className="text-primary-600">{memoizedCostDisplay.totalCost} ETH</span>
+                        </div>
+                        <div className="flex justify-between text-gray-600">
+                          <span>≈ EUR:</span>
+                          <span>{memoizedCostDisplay.eurAmount}</span>
+                        </div>
                       </div>
-                      <div className="flex justify-between">
-                        <span>Stripe Fee:</span>
-                        <span>{(parseFloat(costInfo.stripeFee) / 1e18).toFixed(6)} ETH</span>
+                    ) : (
+                      <div className="flex items-center justify-center h-full">
+                        <div className="text-gray-500 text-sm text-center">
+                          Enter token amount to see cost breakdown
+                        </div>
                       </div>
-                      <div className="flex justify-between">
-                        <span>Gas Fee:</span>
-                        <span>{(parseFloat(costInfo.gasFee) / 1e18).toFixed(6)} ETH</span>
-                      </div>
-                      <div className="border-t pt-2 flex justify-between font-semibold">
-                        <span>Total Cost:</span>
-                        <span className="text-primary-600">{(parseFloat(costInfo.totalCost) / 1e18).toFixed(6)} ETH</span>
-                      </div>
-                      <div className="flex justify-between text-gray-600">
-                        <span>≈ EUR:</span>
-                        <span>{stripeService.formatEur(stripeService.convertEthToEur(parseFloat(costInfo.totalCost) / 1e18))}</span>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="text-gray-500 text-sm">
-                      Enter token amount to see cost breakdown
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -391,9 +458,9 @@ const TokenPurchase: React.FC = () => {
                   </button>
                 )}
 
-                {tokenAmount && costInfo && (
+                {tokenAmount && memoizedCostDisplay && (
                   <div className="text-xs text-gray-500 text-center">
-                    You will receive {tokenAmount} ITC tokens for {(parseFloat(costInfo.totalCost) / 1e18).toFixed(6)} ETH
+                    You will receive {tokenAmount} ITC tokens for {memoizedCostDisplay.totalCost} ETH
                   </div>
                 )}
               </div>
@@ -510,7 +577,7 @@ const TokenPurchase: React.FC = () => {
                   <div className="text-sm text-blue-700 space-y-1">
                     <div className="flex justify-between">
                       <span>Amount:</span>
-                      <span>{stripeService.formatEur(stripeService.convertEthToEur(parseFloat(costInfo?.totalCost || '0') / 1e18))}</span>
+                      <span>{memoizedCostDisplay?.eurAmount || '€0.00'}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>You will receive:</span>
@@ -533,7 +600,7 @@ const TokenPurchase: React.FC = () => {
                       Processing Payment...
                     </div>
                   ) : (
-                    `Pay ${costInfo ? stripeService.formatEur(stripeService.convertEthToEur(parseFloat(costInfo.totalCost) / 1e18)) : '€0.00'}`
+                    `Pay ${memoizedCostDisplay?.eurAmount || '€0.00'}`
                   )}
                 </button>
               </form>

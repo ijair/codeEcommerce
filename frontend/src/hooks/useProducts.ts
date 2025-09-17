@@ -21,19 +21,15 @@ export const useProducts = () => {
   }, [isConnected, isInitialized]);
 
   const loadAllProducts = useCallback(async () => {
-    console.log('useProducts: Starting to load all products...');
     setIsLoading(true);
     setError(null);
     
     try {
-      console.log('useProducts: Calling productsService...');
       const [allProducts, productCount] = await Promise.all([
         productsService.getAllProducts(),
         productsService.getProductCount(),
       ]);
       
-      console.log('useProducts: Products loaded:', allProducts);
-      console.log('useProducts: Product count:', productCount);
       
       setProducts(allProducts);
       setFilteredProducts(allProducts);

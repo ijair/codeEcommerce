@@ -187,6 +187,42 @@ contract SetupTestData is Script {
         console.log("  Total Supply:", token.totalSupply());
         console.log("  Price:", token.getTokenPrice());
         
+        // 5. Test new token functions
+        console.log("\n=== Testing New Token Functions ===");
+        
+        // Test fullFillTokens function (owner adds more tokens)
+        uint256 ownerInitialBalance = token.balanceOf(DEPLOYER);
+        console.log("Owner initial token balance:", ownerInitialBalance);
+        
+        // Owner adds more tokens to their balance
+        vm.deal(DEPLOYER, 5 ether);
+        vm.startBroadcast();
+        token.fullFillTokens{value: 2 ether}();
+        vm.stopBroadcast();
+        
+        uint256 ownerNewBalance = token.balanceOf(DEPLOYER);
+        console.log("Owner balance after fullFillTokens:", ownerNewBalance);
+        console.log("Tokens added:", ownerNewBalance - ownerInitialBalance);
+        
+        // Test buyTokens function (user buys from owner's balance)
+        vm.deal(USER1, 1 ether);
+        uint256 user1InitialBalance = token.balanceOf(USER1);
+        
+        vm.startBroadcast(user1PrivateKey);
+        token.buyTokens{value: 0.5 ether}();
+        vm.stopBroadcast();
+        
+        uint256 user1NewBalance = token.balanceOf(USER1);
+        uint256 ownerFinalBalance = token.balanceOf(DEPLOYER);
+        
+        console.log("USER1 tokens after purchase:", user1NewBalance);
+        console.log("Tokens purchased:", user1NewBalance - user1InitialBalance);
+        console.log("Owner balance after sale:", ownerFinalBalance);
+        
+        console.log("[SUCCESS] NEW TOKEN FUNCTIONS TESTED!");
+        console.log("[OK] fullFillTokens: Owner can add tokens to their balance");
+        console.log("[OK] buyTokens: Users buy tokens from owner's balance");
+        
         console.log("\n[SUCCESS] VERIFICATION COMPLETE!");
         console.log("[OK] Deployer has FULL ACCESS to:");
         console.log("   - All companies (", allCompanies.length, "total )");
@@ -194,6 +230,7 @@ contract SetupTestData is Script {
         console.log("   - All invoices (", allInvoices.length, "total )");
         console.log("   - All clients across all companies");
         console.log("   - Complete token information and management");
+        console.log("   - New token functions: fullFillTokens & buyTokens");
         
         // Save comprehensive test data
         string memory testDataSummary = string(abi.encodePacked(

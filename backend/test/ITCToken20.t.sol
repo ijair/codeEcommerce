@@ -48,81 +48,56 @@ contract ITCToken20Test is Test {
     }
 
     function testBuyTokens() public {
-        uint256 amount = 1000 * 10**18;
-        uint256 cost = amount * TOKEN_PRICE;
+        uint256 ethAmount = 1 ether;
+        uint256 expectedTokens = (ethAmount * 1e18) / TOKEN_PRICE;
         
         // Give user1 enough ETH
-        vm.deal(user1, cost);
+        vm.deal(user1, ethAmount);
+        
+        // Check owner has enough tokens
+        uint256 ownerBalance = token.balanceOf(owner);
+        require(ownerBalance >= expectedTokens, "Owner doesn't have enough tokens");
         
         vm.prank(user1);
-        token.buyTokens{value: cost}(amount);
+        token.buyTokens{value: ethAmount}();
         
-        assertEq(token.balanceOf(user1), amount);
-        assertEq(token.totalSupply(), INITIAL_SUPPLY + amount);
+        assertEq(token.balanceOf(user1), expectedTokens);
+        assertEq(token.balanceOf(owner), ownerBalance - expectedTokens);
     }
 
-    function testBuyTokensWithExcessETH() public {
-        uint256 amount = 1000 * 10**18;
-        uint256 cost = (amount * TOKEN_PRICE) / 1e18; // Use correct calculation
-        uint256 excess = 1 ether;
-        
-        // Give user1 enough ETH
-        vm.deal(user1, cost + excess);
-        uint256 initialBalance = user1.balance;
-        
+    function testBuyTokensZeroETH() public {
         vm.prank(user1);
-        token.buyTokens{value: cost + excess}(amount);
-        
-        assertEq(token.balanceOf(user1), amount);
-        // Check that excess was refunded (allow for small gas differences)
-        assertTrue(user1.balance >= initialBalance - cost - 1000); // Allow small gas cost
-        assertTrue(user1.balance <= initialBalance - cost + 1000); // But not too much difference
+        vm.expectRevert("ITCToken20: Debes enviar ETH");
+        token.buyTokens{value: 0}();
     }
 
-    function testBuyTokensInsufficientETH() public {
-        uint256 amount = 1000 * 10**18;
-        uint256 requiredCost = (amount * TOKEN_PRICE) / 1e18; // Use correct calculation
-        uint256 insufficientCost = requiredCost - 1;
+    function testBuyTokensInsufficientOwnerBalance() public {
+        // First, transfer all owner tokens to user2 to simulate insufficient balance
+        uint256 ownerBalance = token.balanceOf(owner);
+        token.transfer(user2, ownerBalance);
         
-        // Give user1 insufficient ETH
-        vm.deal(user1, insufficientCost);
+        uint256 ethAmount = 1 ether;
+        vm.deal(user1, ethAmount);
         
         vm.prank(user1);
-        vm.expectRevert("ITCToken20: Insufficient ETH sent");
-        token.buyTokens{value: insufficientCost}(amount);
+        vm.expectRevert("ITCToken20: No hay suficientes tokens disponibles");
+        token.buyTokens{value: ethAmount}();
     }
 
-    function testBuyTokensZeroAmount() public {
-        vm.prank(user1);
-        vm.expectRevert("ITCToken20: Amount must be greater than zero");
-        token.buyTokens{value: 1 ether}(0);
-    }
-
-    function testBuyTokensExceedsMaxSupply() public {
-        uint256 amount = MAX_SUPPLY; // Try to buy more than remaining supply
-        uint256 cost = amount * TOKEN_PRICE;
-        
-        // Give user1 enough ETH
-        vm.deal(user1, cost);
-        
-        vm.prank(user1);
-        vm.expectRevert("ITCToken20: Exceeds maximum supply");
-        token.buyTokens{value: cost}(amount);
-    }
 
     function testWithdrawTokens() public {
-        // First buy some tokens
-        uint256 amount = 1000 * 10**18;
-        uint256 cost = amount * TOKEN_PRICE;
+        // First buy some tokens using new method
+        uint256 ethAmount = 1 ether;
+        uint256 expectedTokens = (ethAmount * 1e18) / TOKEN_PRICE;
         
         // Give user1 enough ETH
-        vm.deal(user1, cost);
+        vm.deal(user1, ethAmount);
         
         vm.prank(user1);
-        token.buyTokens{value: cost}(amount);
+        token.buyTokens{value: ethAmount}();
         
         // Now withdraw half
-        uint256 withdrawAmount = amount / 2;
+        uint256 withdrawAmount = expectedTokens / 2;
         
         // Calculate expected withdrawal using the contract's calculation function
         (uint256 netAmount, , ) = token.calculateWithdrawTokensNet(withdrawAmount);
@@ -132,11 +107,11 @@ contract ITCToken20Test is Test {
         vm.prank(user1);
         token.withdrawTokens(withdrawAmount);
         
-        assertEq(token.balanceOf(user1), amount - withdrawAmount);
+        assertEq(token.balanceOf(user1), expectedTokens - withdrawAmount);
         // Allow small differences due to precision in fee calculations
         assertTrue(user1.balance >= initialBalance + netAmount - 1000);
         assertTrue(user1.balance <= initialBalance + netAmount + 1000);
-        assertEq(token.totalSupply(), INITIAL_SUPPLY + amount - withdrawAmount);
+        assertEq(token.totalSupply(), INITIAL_SUPPLY - withdrawAmount); // Total supply decreases when tokens are withdrawn
     }
 
     function testWithdrawTokensInsufficientBalance() public {
@@ -152,15 +127,14 @@ contract ITCToken20Test is Test {
     }
 
     function testWithdrawTokensInsufficientContractBalance() public {
-        // Buy tokens first
-        uint256 amount = 1000 * 10**18;
-        uint256 cost = amount * TOKEN_PRICE;
-        
-        // Give user1 enough ETH
-        vm.deal(user1, cost);
+        // Buy tokens first using new method
+        uint256 ethAmount = 1 ether;
+        vm.deal(user1, ethAmount);
         
         vm.prank(user1);
-        token.buyTokens{value: cost}(amount);
+        token.buyTokens{value: ethAmount}();
+        
+        uint256 userTokens = token.balanceOf(user1);
         
         // Drain contract balance
         token.withdrawAllETH();
@@ -168,7 +142,7 @@ contract ITCToken20Test is Test {
         // Try to withdraw tokens
         vm.prank(user1);
         vm.expectRevert("ITCToken20: Insufficient contract balance");
-        token.withdrawTokens(amount);
+        token.withdrawTokens(userTokens);
     }
 
     function testSetTokenPrice() public {
@@ -236,16 +210,80 @@ contract ITCToken20Test is Test {
         token.burn(user2, 1000 * 10**18);
     }
 
-    function testWithdrawETH() public {
-        // Buy some tokens to add ETH to contract
-        uint256 amount = 1000 * 10**18;
-        uint256 cost = amount * TOKEN_PRICE;
+    // ===== NEW TESTS FOR FULLFILL TOKENS =====
+
+    function testFullFillTokens() public {
+        uint256 ethAmount = 2 ether;
+        uint256 expectedTokens = (ethAmount * 1e18) / TOKEN_PRICE;
+        uint256 initialSupply = token.totalSupply();
+        uint256 initialOwnerBalance = token.balanceOf(owner);
         
-        // Give user1 enough ETH
-        vm.deal(user1, cost);
+        // Owner sends ETH to mint tokens
+        token.fullFillTokens{value: ethAmount}();
+        
+        // Check tokens were minted to owner
+        assertEq(token.balanceOf(owner), initialOwnerBalance + expectedTokens);
+        assertEq(token.totalSupply(), initialSupply + expectedTokens);
+        
+        // Check contract received ETH
+        assertEq(address(token).balance, ethAmount);
+    }
+
+    function testFullFillTokensZeroETH() public {
+        vm.expectRevert("ITCToken20: Debes enviar ETH");
+        token.fullFillTokens{value: 0}();
+    }
+
+    function testFullFillTokensNotOwner() public {
+        vm.prank(user1);
+        vm.expectRevert();
+        token.fullFillTokens{value: 1 ether}();
+    }
+
+    function testFullFillTokensExceedsMaxSupply() public {
+        // Calculate ETH needed to exceed max supply
+        uint256 remainingSupply = token.getRemainingSupply();
+        uint256 excessTokens = remainingSupply + 1000 * 10**18;
+        uint256 excessETH = (excessTokens * TOKEN_PRICE) / 1e18;
+        
+        vm.expectRevert("ITCToken20: Exceeds maximum supply");
+        token.fullFillTokens{value: excessETH}();
+    }
+
+    function testCompleteWorkflowFullFillAndBuy() public {
+        // Step 1: Owner fills more tokens
+        uint256 ownerETH = 5 ether;
+        uint256 expectedOwnerTokens = (ownerETH * 1e18) / TOKEN_PRICE;
+        uint256 initialOwnerBalance = token.balanceOf(owner);
+        
+        token.fullFillTokens{value: ownerETH}();
+        assertEq(token.balanceOf(owner), initialOwnerBalance + expectedOwnerTokens);
+        
+        // Step 2: User buys tokens from owner's balance
+        uint256 userETH = 1 ether;
+        uint256 expectedUserTokens = (userETH * 1e18) / TOKEN_PRICE;
+        vm.deal(user1, userETH);
+        
+        uint256 ownerBalanceBeforeSale = token.balanceOf(owner);
         
         vm.prank(user1);
-        token.buyTokens{value: cost}(amount);
+        token.buyTokens{value: userETH}();
+        
+        // Verify tokens were transferred from owner to user
+        assertEq(token.balanceOf(user1), expectedUserTokens);
+        assertEq(token.balanceOf(owner), ownerBalanceBeforeSale - expectedUserTokens);
+        
+        // Verify contract has both ETH amounts
+        assertEq(address(token).balance, ownerETH + userETH);
+    }
+
+    function testWithdrawETH() public {
+        // Buy some tokens to add ETH to contract
+        uint256 ethAmount = 1 ether;
+        vm.deal(user1, ethAmount);
+        
+        vm.prank(user1);
+        token.buyTokens{value: ethAmount}();
         
         uint256 contractBalance = token.getContractBalance();
         assertTrue(contractBalance > 0);
@@ -262,14 +300,11 @@ contract ITCToken20Test is Test {
 
     function testWithdrawAllETH() public {
         // Buy some tokens to add ETH to contract
-        uint256 amount = 1000 * 10**18;
-        uint256 cost = amount * TOKEN_PRICE;
-        
-        // Give user1 enough ETH
-        vm.deal(user1, cost);
+        uint256 ethAmount = 1 ether;
+        vm.deal(user1, ethAmount);
         
         vm.prank(user1);
-        token.buyTokens{value: cost}(amount);
+        token.buyTokens{value: ethAmount}();
         
         uint256 contractBalance = token.getContractBalance();
         uint256 initialOwnerBalance = owner.balance;
@@ -308,25 +343,29 @@ contract ITCToken20Test is Test {
         assertEq(token.getContractBalance(), amount);
     }
 
-    function testFuzzBuyTokens(uint256 amount) public {
-        vm.assume(amount > 0);
-        vm.assume(amount <= token.getRemainingSupply());
+    function testFuzzBuyTokens(uint256 ethAmount) public {
+        vm.assume(ethAmount > 0);
+        vm.assume(ethAmount <= 10 ether); // Reasonable limit
         
-        uint256 cost = amount * TOKEN_PRICE;
-        vm.deal(user1, cost);
+        uint256 expectedTokens = (ethAmount * 1e18) / TOKEN_PRICE;
+        vm.assume(token.balanceOf(owner) >= expectedTokens); // Owner must have enough tokens
+        
+        vm.deal(user1, ethAmount);
         
         vm.prank(user1);
-        token.buyTokens{value: cost}(amount);
+        token.buyTokens{value: ethAmount}();
         
-        assertEq(token.balanceOf(user1), amount);
+        assertEq(token.balanceOf(user1), expectedTokens);
     }
 
-    function testFuzzWithdrawTokens(uint256 buyAmount, uint256 withdrawAmount) public {
-        // Use more reasonable ranges to avoid too many rejected inputs
-        buyAmount = bound(buyAmount, 1000 * 10**18, 10000 * 10**18);
-        withdrawAmount = bound(withdrawAmount, 100 * 10**18, buyAmount);
+    function testFuzzWithdrawTokens(uint256 ethAmount, uint256 withdrawAmount) public {
+        // Use reasonable ranges
+        ethAmount = bound(ethAmount, 0.1 ether, 5 ether);
         
-        vm.assume(buyAmount <= token.getRemainingSupply());
+        uint256 expectedTokens = (ethAmount * 1e18) / TOKEN_PRICE;
+        withdrawAmount = bound(withdrawAmount, expectedTokens / 10, expectedTokens);
+        
+        vm.assume(token.balanceOf(owner) >= expectedTokens);
         
         // Skip if withdrawal amount is too small to cover fees
         try token.calculateWithdrawTokensNet(withdrawAmount) returns (uint256, uint256, uint256) {
@@ -335,18 +374,17 @@ contract ITCToken20Test is Test {
             return; // Skip this test case
         }
         
-        uint256 cost = (buyAmount * TOKEN_PRICE) / 1e18;
-        vm.deal(user1, cost);
+        vm.deal(user1, ethAmount);
         
         // Buy tokens
         vm.prank(user1);
-        token.buyTokens{value: cost}(buyAmount);
+        token.buyTokens{value: ethAmount}();
         
         // Withdraw tokens
         vm.prank(user1);
         token.withdrawTokens(withdrawAmount);
         
-        assertEq(token.balanceOf(user1), buyAmount - withdrawAmount);
+        assertEq(token.balanceOf(user1), expectedTokens - withdrawAmount);
     }
 
     function testFuzzSetTokenPrice(uint256 newPrice) public {

@@ -74,7 +74,7 @@ contract IntegrationTest is Test {
         vm.deal(customer1, tokenCost + 1 ether);
         
         vm.prank(customer1);
-        token.buyTokens{value: tokenCost}(tokenAmount);
+        token.buyTokens{value: tokenCost}();
         
         assertEq(token.balanceOf(customer1), tokenAmount);
         
@@ -177,7 +177,7 @@ contract IntegrationTest is Test {
             vm.deal(customer1, cost);
             
             vm.prank(customer1);
-            token.buyTokens{value: cost}(amounts[i]);
+            token.buyTokens{value: cost}();
             
             expectedBalance += amounts[i];
             assertEq(token.balanceOf(customer1), expectedBalance);
@@ -208,7 +208,7 @@ contract IntegrationTest is Test {
         vm.deal(customer2, newCost);
         
         vm.prank(customer2);
-        token.buyTokens{value: newCost}(newAmount);
+        token.buyTokens{value: newCost}();
         
         assertEq(token.balanceOf(customer2), newAmount);
     }
@@ -315,7 +315,7 @@ contract IntegrationTest is Test {
         vm.deal(customer1, maxCost);
         
         vm.prank(customer1);
-        token.buyTokens{value: maxCost}(maxTokens);
+        token.buyTokens{value: maxCost}();
         
         assertEq(token.balanceOf(customer1), maxTokens);
         assertEq(token.getRemainingSupply(), 0);
@@ -323,7 +323,7 @@ contract IntegrationTest is Test {
         // Test that no more tokens can be bought
         vm.prank(customer2);
         vm.expectRevert("ITCToken20: Exceeds maximum supply");
-        token.buyTokens{value: 1 ether}(1);
+        token.buyTokens{value: 1 ether}();
     }
 
     function testFuzzIntegration(uint256 tokenAmount, uint256 productPrice, string memory productName) public {
@@ -339,7 +339,7 @@ contract IntegrationTest is Test {
         vm.deal(customer1, tokenCost);
         
         vm.prank(customer1);
-        token.buyTokens{value: tokenCost}(tokenAmount);
+        token.buyTokens{value: tokenCost}();
         
         assertEq(token.balanceOf(customer1), tokenAmount);
         

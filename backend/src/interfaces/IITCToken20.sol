@@ -32,11 +32,10 @@ interface IITCToken20 is IERC20 {
     event TokenPriceUpdated(uint256 newPrice);
 
     /**
-     * @dev Purchase tokens with ETH
-     * @notice Users can buy tokens by sending ETH to this function
-     * @param amount Amount of tokens to purchase
+     * @dev Purchase tokens with ETH (transfers from owner balance)
+     * @notice Users can buy tokens after Stripe payment confirmation
      */
-    function buyTokens(uint256 amount) external payable;
+    function buyTokens() external payable;
 
     /**
      * @dev Withdraw tokens for ETH
@@ -106,4 +105,28 @@ interface IITCToken20 is IERC20 {
      * @param gasFee Gas fee estimate in wei
      */
     function setGasFeeEstimate(uint256 gasFee) external;
+
+    /**
+     * @dev Full fill tokens - Owner can create more tokens by sending ETH
+     * @notice Only owner can call this function to mint tokens to their own balance
+     */
+    function fullFillTokens() external payable;
+
+    /**
+     * @dev Get the contract owner address
+     * @return owner Address of the contract owner
+     */
+    function owner() external view returns (address owner);
+
+    /**
+     * @dev Get maximum supply of tokens
+     * @return maxSupply Maximum supply of tokens
+     */
+    function getMaxSupply() external pure returns (uint256 maxSupply);
+
+    /**
+     * @dev Get remaining supply that can be minted
+     * @return remainingSupply Remaining supply that can be minted
+     */
+    function getRemainingSupply() external view returns (uint256 remainingSupply);
 }

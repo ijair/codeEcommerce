@@ -43,32 +43,20 @@ contract ITCToken20 is ERC20, Ownable, ReentrancyGuard, IITCToken20 {
     }
 
     /**
-     * @dev Purchase tokens with ETH
-     * @param amount Amount of tokens to purchase
-     * @notice Users can buy tokens by sending ETH to this function
+     * @dev Purchase tokens with ETH (transfers from owner balance)
+     * @notice Users can buy tokens after Stripe payment confirmation
      */
-    function buyTokens(uint256 amount) external payable override nonReentrant {
-        require(amount > 0, "ITCToken20: Amount must be greater than zero");
+    function buyTokens() external payable override nonReentrant {
+        require(msg.value > 0, "ITCToken20: Debes enviar ETH");
         
-        // amount is in wei (18 decimals), so we need to calculate cost properly
-        uint256 totalCost = (amount * tokenPrice) / 1e18;
-        require(msg.value >= totalCost, "ITCToken20: Insufficient ETH sent");
+        // Calculate tokens to buy based on ETH sent and token price
+        uint256 tokensToBuy = (msg.value * 1e18) / tokenPrice;
+        require(balanceOf(owner()) >= tokensToBuy, "ITCToken20: No hay suficientes tokens disponibles");
         
-        uint256 change = msg.value - totalCost;
+        // Transfer tokens from owner to buyer
+        _transfer(owner(), msg.sender, tokensToBuy);
         
-        // Check if we have enough tokens to sell (amount is already in wei with 18 decimals)
-        require(totalSupply() + amount <= MAX_SUPPLY, "ITCToken20: Exceeds maximum supply");
-        
-        // Mint tokens to the buyer
-        _mint(msg.sender, amount);
-        
-        // Refund excess ETH
-        if (change > 0) {
-            (bool refundSuccess, ) = payable(msg.sender).call{value: change}("");
-            require(refundSuccess, "ITCToken20: ETH refund failed");
-        }
-        
-        emit TokensPurchased(msg.sender, amount, totalCost);
+        emit TokensPurchased(msg.sender, tokensToBuy, msg.value);
     }
 
     /**
@@ -138,6 +126,24 @@ contract ITCToken20 is ERC20, Ownable, ReentrancyGuard, IITCToken20 {
         require(balance > 0, "ITCToken20: No ETH to withdraw");
         (bool success, ) = payable(owner()).call{value: balance}("");
         require(success, "ITCToken20: ETH withdrawal failed");
+    }
+
+    /**
+     * @dev Full fill tokens - Owner can create more tokens by sending ETH
+     * @notice Only owner can call this function to mint tokens to their own balance
+     */
+    function fullFillTokens() external payable onlyOwner {
+        require(msg.sender == owner(), "ITCToken20: Access Denied, you must be the contract owner");
+        require(msg.value > 0, "ITCToken20: Debes enviar ETH");
+        
+        // Calculate tokens to mint based on ETH sent and token price
+        uint256 tokensToMint = (msg.value * 1e18) / tokenPrice;
+        require(totalSupply() + tokensToMint <= MAX_SUPPLY, "ITCToken20: Exceeds maximum supply");
+        
+        // Mint tokens to the owner
+        _mint(msg.sender, tokensToMint);
+        
+        emit TokensPurchased(msg.sender, tokensToMint, msg.value);
     }
 
     /**

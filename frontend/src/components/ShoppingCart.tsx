@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useCart } from '../hooks/useCart';
 import { useWallet } from '../hooks/useWallet';
 import { useCheckout } from '../hooks/useCheckout';
@@ -33,6 +33,28 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({
   const [isValidating] = useState(false);
   const [checkoutSuccess, setCheckoutSuccess] = useState<string | null>(null);
   const [showInsufficientFunds, setShowInsufficientFunds] = useState(false);
+  const [registerAsClient, setRegisterAsClient] = useState(false);
+
+  // Calculate unique companies in cart for gas estimation
+  const uniqueCompanies = useMemo(() => {
+    const companies = new Set<string>();
+    cart.items.forEach(item => companies.add(item.product.companyId));
+    return companies.size;
+  }, [cart.items]);
+
+  // Estimate gas savings
+  const estimatedGasSavings = useMemo(() => {
+    const gasPerCompany = 180000; // Average gas cost for registerClientPurchase
+    const totalGas = uniqueCompanies * gasPerCompany;
+    const estimatedCostUSD = (totalGas * 20 * 1e-9) * 3000; // 20 gwei * $3000 ETH
+    
+    return {
+      totalGas,
+      gasPerCompany,
+      estimatedCostUSD: estimatedCostUSD.toFixed(2),
+      companiesCount: uniqueCompanies
+    };
+  }, [uniqueCompanies]);
 
   const handleUpdateQuantity = (productId: string, newQuantity: number) => {
     if (newQuantity < 1) {
@@ -73,7 +95,9 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({
       setCheckoutSuccess(null);
       
       console.log('Starting checkout process...');
-      const result = await processCheckout(cart.items, address); // Company ID will be determined automatically
+      const result = await processCheckout(cart.items, address, {
+        skipClientRegistration: !registerAsClient // Skip if not explicitly requested
+      });
       
       if (result.success) {
         setCheckoutSuccess(`Purchase completed! Transaction ID: ${result.invoiceId}`);
@@ -287,6 +311,47 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({
               {isConnected && balances && (
                 <div className="text-sm text-gray-600 bg-gray-50 p-2 rounded">
                   Your ITC Balance: {parseFloat(balances.balanceFormatted).toFixed(6)} ITC
+                </div>
+              )}
+
+              {/* Client Registration Option */}
+              {isConnected && uniqueCompanies > 0 && (
+                <div className={`border rounded-lg p-3 ${registerAsClient ? 'bg-green-50 border-green-200' : 'bg-blue-50 border-blue-200'}`}>
+                  <label className="flex items-start space-x-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={registerAsClient}
+                      onChange={(e) => setRegisterAsClient(e.target.checked)}
+                      className="mt-1 h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                    />
+                    <div className="text-sm flex-1">
+                      <div className={`font-medium ${registerAsClient ? 'text-green-900' : 'text-blue-900'}`}>
+                        Register as Customer
+                      </div>
+                      <div className={`${registerAsClient ? 'text-green-700' : 'text-blue-700'}`}>
+                        Register with {estimatedGasSavings.companiesCount} company{estimatedGasSavings.companiesCount > 1 ? 'ies' : ''} for future benefits and purchase tracking.
+                      </div>
+                      
+                      {/* Gas Cost Information */}
+                      <div className="mt-2 p-2 bg-white bg-opacity-50 rounded text-xs">
+                        <div className="flex justify-between items-center">
+                          <span className="font-medium">Gas Impact:</span>
+                          <span className={registerAsClient ? 'text-orange-600' : 'text-green-600'}>
+                            {registerAsClient ? `+${estimatedGasSavings.totalGas.toLocaleString()} gas` : `Saves ${estimatedGasSavings.totalGas.toLocaleString()} gas`}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span>Est. Cost:</span>
+                          <span className={registerAsClient ? 'text-orange-600' : 'text-green-600'}>
+                            {registerAsClient ? `~$${estimatedGasSavings.estimatedCostUSD}` : `Saves ~$${estimatedGasSavings.estimatedCostUSD}`}
+                          </span>
+                        </div>
+                        <div className="text-gray-600 mt-1">
+                          {estimatedGasSavings.companiesCount} companies × {estimatedGasSavings.gasPerCompany.toLocaleString()} gas each
+                        </div>
+                      </div>
+                    </div>
+                  </label>
                 </div>
               )}
 

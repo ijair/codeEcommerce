@@ -13,7 +13,9 @@ const TokenPurchase: React.FC = () => {
     isLoading, 
     error, 
     buyTokens, 
-    calculateBuyTokensCost 
+    calculateBuyTokensCost,
+    fullFillTokens,
+    checkIsOwner
   } = useTokens();
 
   const [tokenAmount, setTokenAmount] = useState('');
@@ -32,6 +34,11 @@ const TokenPurchase: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const [insufficientFunds, setInsufficientFunds] = useState(false);
   const [hasCalculatedCost, setHasCalculatedCost] = useState(false);
+  
+  // Owner-specific states
+  const [isOwner, setIsOwner] = useState(false);
+  const [ownerEthAmount, setOwnerEthAmount] = useState('');
+  const [showOwnerPanel, setShowOwnerPanel] = useState(false);
 
   // Reset state when wallet address changes
   useEffect(() => {
@@ -42,7 +49,23 @@ const TokenPurchase: React.FC = () => {
     setShowPaymentForm(false);
     setSuccessMessage('');
     setLastCalculatedAmount('');
+    setOwnerEthAmount('');
+    setShowOwnerPanel(false);
   }, [address]);
+
+  // Check if user is owner
+  useEffect(() => {
+    const checkOwnerStatus = async () => {
+      if (isConnected && address) {
+        const ownerStatus = await checkIsOwner();
+        setIsOwner(ownerStatus);
+      } else {
+        setIsOwner(false);
+      }
+    };
+    
+    checkOwnerStatus();
+  }, [isConnected, address, checkIsOwner]);
 
   // Calculate cost when token amount changes (optimized to prevent constant recalculation)
   useEffect(() => {
@@ -202,6 +225,32 @@ const TokenPurchase: React.FC = () => {
     }
   };
 
+  const handleFullFillTokens = async () => {
+    if (!ownerEthAmount || parseFloat(ownerEthAmount) <= 0) {
+      return;
+    }
+
+    setIsProcessing(true);
+    setSuccessMessage('');
+
+    try {
+      const result = await fullFillTokens(ownerEthAmount);
+      
+      if (result.success) {
+        setSuccessMessage(`Successfully added tokens to your balance! ETH sent: ${ownerEthAmount} ETH. Transaction: ${result.transactionHash}`);
+        setOwnerEthAmount('');
+        setShowOwnerPanel(false);
+      } else {
+        throw new Error(result.error || 'Failed to fulfill tokens');
+      }
+    } catch (err: any) {
+      console.error('FullFill tokens error:', err);
+      setSuccessMessage('');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   if (!isConnected) {
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -282,6 +331,91 @@ const TokenPurchase: React.FC = () => {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Owner Panel */}
+      {isOwner && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M18 8a6 6 0 01-7.743 5.743L10 14l-4 4-4-4 4-4 .257.257A6 6 0 1118 8zm-6-2a1 1 0 11-2 0 1 1 0 012 0z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-blue-800">
+                  Owner Functions
+                </h3>
+                <div className="mt-1 text-sm text-blue-700">
+                  You are the contract owner. Add more tokens to your balance.
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowOwnerPanel(!showOwnerPanel)}
+              className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+            >
+              {showOwnerPanel ? 'Hide' : 'Show'} Owner Panel
+            </button>
+          </div>
+
+          {showOwnerPanel && (
+            <div className="border-t border-blue-200 pt-4">
+              <h4 className="text-sm font-medium text-blue-800 mb-3">
+                Full Fill Tokens
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="ownerEthAmount" className="block text-sm font-medium text-blue-700 mb-1">
+                    ETH Amount to Send
+                  </label>
+                  <input
+                    type="text"
+                    id="ownerEthAmount"
+                    value={ownerEthAmount}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                        setOwnerEthAmount(value);
+                      }
+                    }}
+                    placeholder="Enter ETH amount (e.g., 1.5)"
+                    className="input-field"
+                    disabled={isProcessing}
+                  />
+                  <div className="mt-1 text-xs text-blue-600">
+                    This will mint tokens to your balance based on current token price
+                  </div>
+                </div>
+                <div className="flex flex-col justify-end">
+                  <button
+                    onClick={handleFullFillTokens}
+                    disabled={!ownerEthAmount || parseFloat(ownerEthAmount) <= 0 || isProcessing}
+                    className="btn-primary"
+                  >
+                    {isProcessing ? (
+                      <div className="flex items-center justify-center">
+                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Processing...
+                      </div>
+                    ) : (
+                      `Add Tokens (${ownerEthAmount || '0'} ETH)`
+                    )}
+                  </button>
+                  {ownerEthAmount && priceInfo && (
+                    <div className="mt-2 text-xs text-blue-600">
+                      ≈ {((parseFloat(ownerEthAmount) * 1e18) / parseFloat(priceInfo.tokenPrice) / 1e18).toFixed(2)} ITC tokens
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

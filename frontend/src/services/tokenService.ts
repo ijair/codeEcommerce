@@ -130,7 +130,7 @@ class TokenService {
   }
 
   /**
-   * Buy tokens (simulated Stripe payment)
+   * Buy tokens (after Stripe payment confirmation)
    */
   async buyTokens(tokenAmount: string, userAddress: string): Promise<TokenPurchaseResult> {
     try {
@@ -140,11 +140,12 @@ class TokenService {
         throw new Error('Token contract not available');
       }
 
-      // Calculate total cost
-      const costInfo = await this.calculateBuyTokensCost(tokenAmount);
-      if (!costInfo) {
-        throw new Error('Failed to calculate token cost');
-      }
+      // Get token price to calculate ETH cost
+      const tokenPrice = await tokenContract.getTokenPrice();
+      const tokenAmountWei = ethers.parseEther(tokenAmount);
+      
+      // Calculate ETH cost: (tokenAmount * tokenPrice) / 1e18
+      const ethCost = (tokenAmountWei * tokenPrice) / BigInt('1000000000000000000');
 
       // Check if user has enough ETH
       const signer = tokenContract.runner;
@@ -154,12 +155,22 @@ class TokenService {
       }
       
       const userBalance = await ethProvider.getBalance(userAddress);
-      const totalCostBigInt = BigInt(costInfo.totalCost);
       
-      if (userBalance < totalCostBigInt) {
+      if (userBalance < ethCost) {
         return {
           success: false,
-          error: `Insufficient ETH balance. Required: ${ethers.formatEther(costInfo.totalCost)} ETH, Available: ${ethers.formatEther(userBalance)} ETH`,
+          error: `Insufficient ETH balance. Required: ${ethers.formatEther(ethCost)} ETH, Available: ${ethers.formatEther(userBalance)} ETH`,
+        };
+      }
+
+      // Check if owner has enough tokens to sell
+      const ownerAddress = await tokenContract.owner();
+      const ownerTokenBalance = await tokenContract.balanceOf(ownerAddress);
+      
+      if (ownerTokenBalance < tokenAmountWei) {
+        return {
+          success: false,
+          error: `Insufficient tokens available. Requested: ${tokenAmount} ITC, Available: ${ethers.formatEther(ownerTokenBalance)} ITC`,
         };
       }
 
@@ -167,16 +178,9 @@ class TokenService {
       console.log('Processing Stripe payment simulation...');
       await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate payment delay
 
-      // Execute token purchase
-      const tokenAmountWei = ethers.parseEther(tokenAmount);
-      
-      // The contract calculates the cost internally, so we need to send the exact amount it expects
-      // This is just the base token cost (tokenAmount * tokenPrice / 1e18)
-      const tokenPrice = BigInt('1000000000000000'); // 0.001 ETH in wei
-      const baseCost = (tokenAmountWei * tokenPrice) / BigInt('1000000000000000000');
-      
-      const tx = await tokenContract.buyTokens(tokenAmountWei, {
-        value: baseCost,
+      // Execute token purchase - new function doesn't take parameters
+      const tx = await tokenContract.buyTokens({
+        value: ethCost,
         gasLimit: 300000,
       });
 
@@ -205,6 +209,13 @@ class TokenService {
         return {
           success: false,
           error: 'Transaction rejected by user',
+        };
+      }
+
+      if (error.message.includes('No hay suficientes tokens disponibles')) {
+        return {
+          success: false,
+          error: 'Not enough tokens available from owner. Please try a smaller amount.',
         };
       }
 
@@ -288,6 +299,98 @@ class TokenService {
   }
 
   /**
+   * Owner function to add more tokens to their balance
+   */
+  async fullFillTokens(ethAmount: string): Promise<TokenPurchaseResult> {
+    try {
+      const tokenContract = contractService.getContract('token');
+      
+      if (!tokenContract) {
+        throw new Error('Token contract not available');
+      }
+
+      const ethAmountWei = ethers.parseEther(ethAmount);
+
+      // Check if user is the owner
+      const signer = tokenContract.runner;
+      if (!signer) {
+        throw new Error('Signer not available');
+      }
+      
+      const userAddress = await signer.getAddress();
+      const ownerAddress = await tokenContract.owner();
+      
+      if (userAddress.toLowerCase() !== ownerAddress.toLowerCase()) {
+        return {
+          success: false,
+          error: 'Only the contract owner can use this function',
+        };
+      }
+
+      // Check if user has enough ETH
+      const ethProvider = signer.provider;
+      if (!ethProvider) {
+        throw new Error('Provider not available');
+      }
+      
+      const userBalance = await ethProvider.getBalance(userAddress);
+      
+      if (userBalance < ethAmountWei) {
+        return {
+          success: false,
+          error: `Insufficient ETH balance. Required: ${ethAmount} ETH, Available: ${ethers.formatEther(userBalance)} ETH`,
+        };
+      }
+
+      // Execute fullFillTokens
+      const tx = await tokenContract.fullFillTokens({
+        value: ethAmountWei,
+        gasLimit: 300000,
+      });
+
+      console.log('FullFill tokens transaction sent:', tx.hash);
+      
+      // Wait for transaction confirmation
+      const receipt = await tx.wait();
+      console.log('FullFill tokens confirmed:', receipt.transactionHash);
+
+      return {
+        success: true,
+        transactionHash: receipt.transactionHash,
+      };
+    } catch (error: any) {
+      console.error('Error in fullFillTokens:', error);
+      
+      // Handle specific error cases
+      if (error.message.includes('insufficient funds')) {
+        return {
+          success: false,
+          error: 'Insufficient ETH balance for transaction and gas fees',
+        };
+      }
+      
+      if (error.message.includes('user rejected')) {
+        return {
+          success: false,
+          error: 'Transaction rejected by user',
+        };
+      }
+
+      if (error.message.includes('Access Denied')) {
+        return {
+          success: false,
+          error: 'Access denied. Only the contract owner can use this function.',
+        };
+      }
+
+      return {
+        success: false,
+        error: error.message || 'Failed to fulfill tokens',
+      };
+    }
+  }
+
+  /**
    * Get token contract information
    */
   async getTokenInfo(): Promise<{
@@ -324,6 +427,31 @@ class TokenService {
     } catch (error: any) {
       console.error('Error getting token info:', error);
       return null;
+    }
+  }
+
+  /**
+   * Check if current user is the contract owner
+   */
+  async isOwner(): Promise<boolean> {
+    try {
+      const tokenContract = contractService.getContract('token');
+      if (!tokenContract) {
+        return false;
+      }
+
+      const signer = tokenContract.runner;
+      if (!signer) {
+        return false;
+      }
+
+      const userAddress = await signer.getAddress();
+      const ownerAddress = await tokenContract.owner();
+      
+      return userAddress.toLowerCase() === ownerAddress.toLowerCase();
+    } catch (error: any) {
+      console.error('Error checking owner status:', error);
+      return false;
     }
   }
 }

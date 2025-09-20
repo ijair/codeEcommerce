@@ -45,24 +45,22 @@ const Header: React.FC = () => {
             <a href="/products" className="text-gray-700 hover:text-primary-600 font-medium">
               Products
             </a>
-            {isAdmin && (
-              <a href="/companies" className="text-gray-700 hover:text-primary-600 font-medium">
-                Companies
+            
+            {/* Admin Navigation */}
+            {isAdmin ? (
+              <a href="/admin/dashboard" className="text-blue-700 hover:text-blue-800 font-medium">
+                🔧 Admin Dashboard
               </a>
-            )}
-            <a href="/tokens" className="text-gray-700 hover:text-primary-600 font-medium">
-              Buy Tokens
-            </a>
-            <a href="/withdraw" className="text-gray-700 hover:text-primary-600 font-medium">
-              Withdraw
-            </a>
-            <a href="/purchases" className="text-gray-700 hover:text-primary-600 font-medium">
-              My Purchases
-            </a>
-            {isAdmin && (
-              <a href="/dashboard" className="text-gray-700 hover:text-primary-600 font-medium">
-                Dashboard
-              </a>
+            ) : (
+              /* User Navigation */
+              <>
+                <a href="/my-balance" className="text-gray-700 hover:text-primary-600 font-medium">
+                  My Balance
+                </a>
+                <a href="/tokens" className="text-gray-700 hover:text-primary-600 font-medium">
+                  Buy Tokens
+                </a>
+              </>
             )}
           </nav>
 

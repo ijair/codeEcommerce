@@ -12,7 +12,11 @@ export const useCheckout = () => {
    */
   const processCheckout = async (
     cartItems: CartItem[],
-    userAddress: string
+    userAddress: string,
+    options?: {
+      registerAsClient?: boolean;
+      skipClientRegistration?: boolean;
+    }
   ): Promise<CheckoutResult> => {
     setIsProcessing(true);
     setError(null);
@@ -25,7 +29,7 @@ export const useCheckout = () => {
       }
 
       // Process checkout
-      const result = await checkoutService.processCheckout(cartItems, userAddress);
+      const result = await checkoutService.processCheckout(cartItems, userAddress, options);
       
       if (!result.success) {
         throw new Error(result.error || 'Checkout failed');

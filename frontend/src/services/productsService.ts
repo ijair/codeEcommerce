@@ -57,7 +57,6 @@ class ProductsService {
         throw new Error('Products contract not available');
       }
 
-      console.log('ProductsService: Calling getAllProducts...');
       const products = await productsContract.getAllProducts();
       
       const formatted = this.formatProductsArray(products);

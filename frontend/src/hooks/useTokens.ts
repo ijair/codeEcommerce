@@ -139,6 +139,43 @@ export const useTokens = () => {
     }
   };
 
+  const fullFillTokens = async (ethAmount: string): Promise<TokenPurchaseResult> => {
+    if (!address) {
+      return { success: false, error: 'Wallet not connected' };
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const result = await tokenService.fullFillTokens(ethAmount);
+      
+      if (result.success) {
+        // Reload balances after successful token fulfillment
+        await loadTokenData();
+      } else {
+        setError(result.error || 'Failed to fulfill tokens');
+      }
+      
+      return result;
+    } catch (err: any) {
+      const errorMessage = err.message || 'Failed to fulfill tokens';
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const checkIsOwner = async (): Promise<boolean> => {
+    try {
+      return await tokenService.isOwner();
+    } catch (err: any) {
+      console.error('Error checking owner status:', err);
+      return false;
+    }
+  };
+
   const refreshBalances = async () => {
     await loadTokenData();
   };
@@ -154,9 +191,11 @@ export const useTokens = () => {
     // Actions
     buyTokens,
     withdrawTokens,
+    fullFillTokens,
     calculateBuyTokensCost,
     calculateWithdrawTokensNet,
     refreshBalances,
+    checkIsOwner,
     
     // Computed values
     hasTokens: balances ? parseFloat(balances.balanceFormatted) > 0 : false,

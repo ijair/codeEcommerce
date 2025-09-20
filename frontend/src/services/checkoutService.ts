@@ -2,6 +2,7 @@ import { ethers } from 'ethers';
 import type { CheckoutResult } from '../types/contracts';
 import type { CartItem } from './cartService';
 import { contractService } from './contractService';
+import { clientService } from './clientService';
 
 /**
  * Service for handling checkout and purchase transactions
@@ -12,7 +13,11 @@ class CheckoutService {
    */
   async processCheckout(
     cartItems: CartItem[],
-    userAddress: string
+    userAddress: string,
+    options: {
+      registerAsClient?: boolean;
+      skipClientRegistration?: boolean;
+    } = {}
   ): Promise<CheckoutResult> {
     try {
       if (!cartItems || cartItems.length === 0) {
@@ -29,7 +34,6 @@ class CheckoutService {
       const tokenContract = contractService.getContract('token');
       const productsContract = contractService.getContract('products');
       const companyContract = contractService.getContract('company');
-      const clientsContract = contractService.getContract('clients');
       
       if (!tokenContract || !productsContract || !companyContract) {
         throw new Error('Required contracts not initialized');
@@ -73,6 +77,11 @@ class CheckoutService {
 
       // Process each purchase (transfer tokens and update stock)
       const receipts = [];
+      const purchasesByCompany = new Map<string, {
+        companyId: bigint;
+        totalAmount: bigint;
+        products: Array<{productId: number; quantity: number; price: bigint}>;
+      }>();
 
       for (const item of purchaseItems) {
         console.log(`Processing purchase for product ${item.productId}, quantity ${item.quantity}`);
@@ -93,20 +102,41 @@ class CheckoutService {
         const stockReceipt = await stockTx.wait();
         receipts.push(stockReceipt);
 
-        // Register client purchase if contracts are available
-        if (clientsContract) {
-          try {
-            await clientsContract.registerClientPurchase(
-              product.companyId,
-              userAddress,
-              item.totalPrice
-            );
-            console.log(`Client purchase registered for company ${product.companyId}`);
-          } catch (error) {
-            console.warn('Failed to register client purchase:', error);
-            // Continue with purchase even if client registration fails
-          }
+        // Store company info for later client registration (optimize to single call)
+        if (!purchasesByCompany.has(product.companyId.toString())) {
+          purchasesByCompany.set(product.companyId.toString(), {
+            companyId: product.companyId,
+            totalAmount: 0n,
+            products: []
+          });
         }
+        
+        const companyPurchase = purchasesByCompany.get(product.companyId.toString())!;
+        companyPurchase.totalAmount += item.totalPrice;
+        companyPurchase.products.push({
+          productId: item.productId,
+          quantity: item.quantity,
+          price: item.totalPrice
+        });
+      }
+
+      // Register client purchases (optimized batch processing)
+      if (!options.skipClientRegistration && options.registerAsClient !== false) {
+        const purchasesToRegister = Array.from(purchasesByCompany.values()).map(p => ({
+          companyId: p.companyId,
+          totalAmount: p.totalAmount
+        }));
+
+        const registrationResult = await clientService.batchRegisterPurchases(userAddress, purchasesToRegister);
+        
+        if (registrationResult.success) {
+          console.log(`✅ Client registration completed. Total gas used: ${registrationResult.gasUsed}`);
+        } else {
+          console.warn(`⚠️ Client registration partially failed. Errors: ${registrationResult.errors.length}`);
+          // Continue with purchase even if client registration fails
+        }
+      } else {
+        console.log('💰 Skipping client registration to save gas costs (~180k gas per company)');
       }
 
       // Generate purchase ID (no formal invoice creation as client is not company owner)

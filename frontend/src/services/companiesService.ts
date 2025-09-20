@@ -114,15 +114,12 @@ class CompaniesService {
         throw new Error('Company contract not available');
       }
 
-      console.log('Creating company with name:', companyData.name);
       
       const tx = await companyContract.createCompany(companyData.name, {
         gasLimit: 300000,
       });
 
-      console.log('Company creation transaction sent:', tx.hash);
       const receipt = await tx.wait();
-      console.log('Company creation confirmed:', receipt.transactionHash);
       
       // Get the company ID from the latest count
       const companyId = await this.getLastCompanyId();

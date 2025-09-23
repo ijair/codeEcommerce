@@ -173,6 +173,14 @@ contract ITCToken20 is ERC20, Ownable, ReentrancyGuard, IITCToken20 {
     }
 
     /**
+     * @dev Get the contract owner address
+     * @return Address of the contract owner
+     */
+    function owner() public view override(Ownable, IITCToken20) returns (address) {
+        return super.owner();
+    }
+
+    /**
      * @dev Get maximum supply
      * @return Maximum supply of tokens
      */

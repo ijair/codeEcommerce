@@ -7,12 +7,14 @@ import { useWallet } from '../hooks/useWallet';
 import { useAdmin } from '../hooks/useAdmin';
 import { useCompanies } from '../hooks/useCompanies';
 import { useProducts } from '../hooks/useProducts';
+import { useAdminStats } from '../hooks/useAdminStats';
 
 const Dashboard: React.FC = () => {
   const { isConnected } = useWallet();
   const { isAdmin, isLoading } = useAdmin();
-  const { totalCount: companyCount, refreshCompanies } = useCompanies();
-  const { totalCount: productCount, refreshProducts } = useProducts();
+  const { refreshCompanies } = useCompanies();
+  const { refreshProducts } = useProducts();
+  const { stats, statsWithChanges, isLoading: statsLoading, refreshStats } = useAdminStats();
   
   const [activeTab, setActiveTab] = useState<'overview' | 'create-company' | 'create-product'>('overview');
 
@@ -189,35 +191,209 @@ const Dashboard: React.FC = () => {
 
             {/* Platform Statistics */}
             <div className="bg-white rounded-lg shadow-md p-6 mt-8">
-              <h3 className="text-lg font-semibold text-gray-900 mb-6">
-                Platform Statistics
-              </h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-primary-600 mb-1">
-                    5
-                  </div>
-                  <div className="text-sm text-gray-600">Smart Contracts</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600 mb-1">
-                    {companyCount}
-                  </div>
-                  <div className="text-sm text-gray-600">Companies</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-600 mb-1">
-                    {productCount}
-                  </div>
-                  <div className="text-sm text-gray-600">Products</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-purple-600 mb-1">
-                    1M
-                  </div>
-                  <div className="text-sm text-gray-600">Max Token Supply</div>
-                </div>
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Platform Statistics
+                </h3>
+                <button
+                  onClick={refreshStats}
+                  disabled={statsLoading}
+                  className="text-sm text-primary-600 hover:text-primary-700 disabled:text-gray-400"
+                >
+                  {statsLoading ? 'Refreshing...' : 'Refresh'}
+                </button>
               </div>
+              
+              {statsLoading ? (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {[...Array(4)].map((_, i) => (
+                    <div key={i} className="text-center">
+                      <div className="animate-pulse bg-gray-200 h-8 rounded mb-2"></div>
+                      <div className="animate-pulse bg-gray-200 h-4 rounded w-16 mx-auto"></div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-primary-600 mb-1">
+                      {stats.smartContracts}
+                    </div>
+                    <div className="text-sm text-gray-600">Smart Contracts</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-green-600 mb-1">
+                      {stats.totalCompanies}
+                    </div>
+                    <div className="text-sm text-gray-600">Companies</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-blue-600 mb-1">
+                      {stats.totalProducts}
+                    </div>
+                    <div className="text-sm text-gray-600">Products</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-purple-600 mb-1">
+                      {parseInt(stats.maxTokenSupply).toLocaleString()}
+                    </div>
+                    <div className="text-sm text-gray-600">Max Token Supply</div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Business Statistics */}
+            <div className="bg-white rounded-lg shadow-md p-6 mt-8">
+              <h3 className="text-lg font-semibold text-gray-900 mb-6">
+                Business Statistics
+              </h3>
+              
+              {statsLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {[...Array(6)].map((_, i) => (
+                    <div key={i} className="text-center">
+                      <div className="animate-pulse bg-gray-200 h-8 rounded mb-2"></div>
+                      <div className="animate-pulse bg-gray-200 h-4 rounded w-20 mx-auto mb-1"></div>
+                      <div className="animate-pulse bg-gray-200 h-3 rounded w-12 mx-auto"></div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-green-600 mb-1">
+                      {stats.totalSales}
+                    </div>
+                    <div className="text-sm text-gray-600 mb-1">Total Sales</div>
+                    {statsWithChanges && statsWithChanges.totalSales.change !== 0 && (
+                      <div className={`text-xs flex items-center justify-center ${
+                        statsWithChanges.totalSales.changeType === 'increase' 
+                          ? 'text-green-600' 
+                          : statsWithChanges.totalSales.changeType === 'decrease'
+                          ? 'text-red-600'
+                          : 'text-gray-500'
+                      }`}>
+                        <span>📊</span>
+                        <span className="ml-1">
+                          {statsWithChanges.totalSales.changeType === 'increase' ? '+' : ''}
+                          {statsWithChanges.totalSales.change}%
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-blue-600 mb-1">
+                      {stats.totalTransactions}
+                    </div>
+                    <div className="text-sm text-gray-600 mb-1">Total Transactions</div>
+                    {statsWithChanges && statsWithChanges.totalTransactions.change !== 0 && (
+                      <div className={`text-xs flex items-center justify-center ${
+                        statsWithChanges.totalTransactions.changeType === 'increase' 
+                          ? 'text-green-600' 
+                          : statsWithChanges.totalTransactions.changeType === 'decrease'
+                          ? 'text-red-600'
+                          : 'text-gray-500'
+                      }`}>
+                        <span>💎</span>
+                        <span className="ml-1">
+                          {statsWithChanges.totalTransactions.changeType === 'increase' ? '+' : ''}
+                          {statsWithChanges.totalTransactions.change}%
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-purple-600 mb-1">
+                      {parseFloat(stats.totalRevenue).toFixed(2)} ETH
+                    </div>
+                    <div className="text-sm text-gray-600 mb-1">Total Revenue (ETH)</div>
+                    {statsWithChanges && statsWithChanges.totalRevenue.change !== 0 && (
+                      <div className={`text-xs flex items-center justify-center ${
+                        statsWithChanges.totalRevenue.changeType === 'increase' 
+                          ? 'text-green-600' 
+                          : statsWithChanges.totalRevenue.changeType === 'decrease'
+                          ? 'text-red-600'
+                          : 'text-gray-500'
+                      }`}>
+                        <span>💰</span>
+                        <span className="ml-1">
+                          {statsWithChanges.totalRevenue.changeType === 'increase' ? '+' : ''}
+                          {statsWithChanges.totalRevenue.change}%
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-orange-600 mb-1">
+                      {stats.activeUsers}
+                    </div>
+                    <div className="text-sm text-gray-600 mb-1">Active Users</div>
+                    {statsWithChanges && statsWithChanges.activeUsers.change !== 0 && (
+                      <div className={`text-xs flex items-center justify-center ${
+                        statsWithChanges.activeUsers.changeType === 'increase' 
+                          ? 'text-green-600' 
+                          : statsWithChanges.activeUsers.changeType === 'decrease'
+                          ? 'text-red-600'
+                          : 'text-gray-500'
+                      }`}>
+                        <span>👥</span>
+                        <span className="ml-1">
+                          {statsWithChanges.activeUsers.changeType === 'increase' ? '+' : ''}
+                          {statsWithChanges.activeUsers.change}%
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-indigo-600 mb-1">
+                      {stats.totalCompanies}
+                    </div>
+                    <div className="text-sm text-gray-600 mb-1">Total Companies</div>
+                    {statsWithChanges && statsWithChanges.totalCompanies.change !== 0 && (
+                      <div className={`text-xs flex items-center justify-center ${
+                        statsWithChanges.totalCompanies.changeType === 'increase' 
+                          ? 'text-green-600' 
+                          : statsWithChanges.totalCompanies.changeType === 'decrease'
+                          ? 'text-red-600'
+                          : 'text-gray-500'
+                      }`}>
+                        <span>🏢</span>
+                        <span className="ml-1">
+                          {statsWithChanges.totalCompanies.changeType === 'increase' ? '+' : ''}
+                          {statsWithChanges.totalCompanies.change}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-pink-600 mb-1">
+                      {stats.totalProducts}
+                    </div>
+                    <div className="text-sm text-gray-600 mb-1">Total Products</div>
+                    {statsWithChanges && statsWithChanges.totalProducts.change !== 0 && (
+                      <div className={`text-xs flex items-center justify-center ${
+                        statsWithChanges.totalProducts.changeType === 'increase' 
+                          ? 'text-green-600' 
+                          : statsWithChanges.totalProducts.changeType === 'decrease'
+                          ? 'text-red-600'
+                          : 'text-gray-500'
+                      }`}>
+                        <span>📦</span>
+                        <span className="ml-1">
+                          {statsWithChanges.totalProducts.changeType === 'increase' ? '+' : ''}
+                          {statsWithChanges.totalProducts.change}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -230,6 +406,7 @@ const Dashboard: React.FC = () => {
             onSuccess={(result) => {
               console.log('Company created:', result);
               refreshCompanies();
+              refreshStats();
               // Optionally switch back to overview tab
               setTimeout(() => setActiveTab('overview'), 2000);
             }}
@@ -244,6 +421,7 @@ const Dashboard: React.FC = () => {
             onSuccess={(result) => {
               console.log('Product created:', result);
               refreshProducts();
+              refreshStats();
               // Optionally switch back to overview tab
               setTimeout(() => setActiveTab('overview'), 2000);
             }}

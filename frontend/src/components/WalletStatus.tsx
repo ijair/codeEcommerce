@@ -11,6 +11,7 @@ const WalletStatus: React.FC = () => {
     error: walletError,
     isLoading: walletLoading,
     connectWallet,
+    disconnectWallet,
     switchNetwork 
   } = useWallet();
   
@@ -51,9 +52,18 @@ const WalletStatus: React.FC = () => {
     <div className="space-y-4">
       {/* Wallet Info Card */}
       <div className="card">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">
-          Wallet Information
-        </h3>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold text-gray-900">
+            Wallet Information
+          </h3>
+          <button
+            onClick={disconnectWallet}
+            disabled={walletLoading}
+            className="px-3 py-1 text-sm bg-red-100 text-red-700 hover:bg-red-200 rounded-md transition-colors disabled:opacity-50"
+          >
+            {walletLoading ? 'Disconnecting...' : 'Disconnect'}
+          </button>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">

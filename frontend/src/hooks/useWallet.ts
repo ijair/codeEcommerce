@@ -23,6 +23,21 @@ export const useWallet = () => {
       try {
         // First check if MetaMask is available
         if (walletService.isMetaMaskInstalled()) {
+          // Check if user manually disconnected
+          const userDisconnected = localStorage.getItem('wallet-disconnected') === 'true';
+          
+          if (userDisconnected) {
+            // User manually disconnected, don't auto-connect
+            setWalletState({
+              isConnected: false,
+              address: null,
+              balance: null,
+              network: null,
+              error: null,
+            });
+            return;
+          }
+
           // Check if already connected
           const accounts = await window.ethereum.request({ method: 'eth_accounts' });
           if (accounts && accounts.length > 0) {
@@ -71,6 +86,8 @@ export const useWallet = () => {
   const connectWallet = async () => {
     setIsLoading(true);
     try {
+      // Clear the disconnected flag when user manually connects
+      localStorage.removeItem('wallet-disconnected');
       await walletService.connectWallet();
     } catch (error) {
       console.error('Error connecting wallet:', error);
@@ -82,6 +99,8 @@ export const useWallet = () => {
   const disconnectWallet = async () => {
     setIsLoading(true);
     try {
+      // Set the disconnected flag to prevent auto-reconnection
+      localStorage.setItem('wallet-disconnected', 'true');
       await walletService.disconnectWallet();
     } catch (error) {
       console.error('Error disconnecting wallet:', error);

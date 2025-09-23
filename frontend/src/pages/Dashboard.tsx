@@ -104,6 +104,84 @@ const Dashboard: React.FC = () => {
         </nav>
       </div>
 
+      {/* Quick Actions - Moved to top for better UX */}
+      <div className="mb-8">
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-6">
+            Admin Quick Actions
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <button
+              onClick={() => setActiveTab('create-company')}
+              className="p-4 border border-gray-200 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors text-left"
+            >
+              <div className="flex items-center">
+                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                  <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                </div>
+                <div>
+                  <h4 className="font-medium text-gray-900">Create Company</h4>
+                  <p className="text-sm text-gray-600">Add new companies to the platform</p>
+                </div>
+              </div>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('create-product')}
+              className="p-4 border border-gray-200 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors text-left"
+            >
+              <div className="flex items-center">
+                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                  <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                </div>
+                <div>
+                  <h4 className="font-medium text-gray-900">Create Product</h4>
+                  <p className="text-sm text-gray-600">Add new products to companies</p>
+                </div>
+              </div>
+            </button>
+
+            <a
+              href="/admin/companies"
+              className="p-4 border border-gray-200 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors"
+            >
+              <div className="flex items-center">
+                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                  <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                </div>
+                <div>
+                  <h4 className="font-medium text-gray-900">Manage Companies</h4>
+                  <p className="text-sm text-gray-600">View and manage all companies</p>
+                </div>
+              </div>
+            </a>
+
+            <a
+              href="/admin/products"
+              className="p-4 border border-gray-200 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors"
+            >
+              <div className="flex items-center">
+                <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+                  <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                  </svg>
+                </div>
+                <div>
+                  <h4 className="font-medium text-gray-900">Manage Products</h4>
+                  <p className="text-sm text-gray-600">View and manage all products</p>
+                </div>
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+
       {/* Tab Content */}
       {activeTab === 'overview' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -112,82 +190,8 @@ const Dashboard: React.FC = () => {
             <WalletStatus />
           </div>
 
-          {/* Quick Actions */}
+          {/* Statistics */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-6">
-                Admin Quick Actions
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <button
-                  onClick={() => setActiveTab('create-company')}
-                  className="p-4 border border-gray-200 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors text-left"
-                >
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
-                      <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-gray-900">Create Company</h4>
-                      <p className="text-sm text-gray-600">Add new companies to the platform</p>
-                    </div>
-                  </div>
-                </button>
-
-                <button
-                  onClick={() => setActiveTab('create-product')}
-                  className="p-4 border border-gray-200 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors text-left"
-                >
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                      <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-gray-900">Create Product</h4>
-                      <p className="text-sm text-gray-600">Add new products to companies</p>
-                    </div>
-                  </div>
-                </button>
-
-                <a
-                  href="/companies"
-                  className="p-4 border border-gray-200 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors"
-                >
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
-                      <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-gray-900">Manage Companies</h4>
-                      <p className="text-sm text-gray-600">View and manage all companies</p>
-                    </div>
-                  </div>
-                </a>
-
-                <a
-                  href="/products"
-                  className="p-4 border border-gray-200 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors"
-                >
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
-                      <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-gray-900">Manage Products</h4>
-                      <p className="text-sm text-gray-600">View and manage all products</p>
-                    </div>
-                  </div>
-                </a>
-              </div>
-            </div>
 
             {/* Platform Statistics */}
             <div className="bg-white rounded-lg shadow-md p-6 mt-8">

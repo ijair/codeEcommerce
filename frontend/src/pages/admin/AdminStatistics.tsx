@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useWallet } from '../../hooks/useWallet';
 import { useTokens } from '../../hooks/useTokens';
+import { adminStatsService } from '../../services/adminStatsService';
 
 /**
  * Admin Statistics Page - View sales analytics and transaction summaries
@@ -26,23 +27,37 @@ const AdminStatistics: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate loading statistics
     const loadStatistics = async () => {
       setLoading(true);
-      // In production, fetch real data from contracts
-      setTimeout(() => {
+      try {
+        // Use the real admin stats service
+        const realStats = await adminStatsService.getAdminStats();
         setStats({
-          totalSales: 156,
-          totalTransactions: 234,
-          totalRevenue: 45.67,
-          activeUsers: 89,
-          totalCompanies: 12,
-          totalProducts: 67,
-          tokensSold: 15420,
-          tokensWithdrawn: 2340
+          totalSales: realStats.totalSales,
+          totalTransactions: realStats.totalTransactions,
+          totalRevenue: parseFloat(realStats.totalRevenue),
+          activeUsers: realStats.activeUsers,
+          totalCompanies: realStats.totalCompanies,
+          totalProducts: realStats.totalProducts,
+          tokensSold: 0, // This would need to be calculated from token events
+          tokensWithdrawn: 0 // This would need to be calculated from token events
         });
+      } catch (error) {
+        console.error('Error loading statistics:', error);
+        // Set to zero values if there's an error
+        setStats({
+          totalSales: 0,
+          totalTransactions: 0,
+          totalRevenue: 0,
+          activeUsers: 0,
+          totalCompanies: 0,
+          totalProducts: 0,
+          tokensSold: 0,
+          tokensWithdrawn: 0
+        });
+      } finally {
         setLoading(false);
-      }, 1000);
+      }
     };
 
     if (isConnected) {
@@ -265,25 +280,43 @@ const AdminStatistics: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       New Sales
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">12</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">89</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">234</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {loading ? '...' : '0'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {loading ? '...' : '0'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {loading ? '...' : '0'}
+                    </td>
                   </tr>
                   <tr>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       Token Purchases
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">456 ITC</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2,340 ITC</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">8,920 ITC</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {loading ? '...' : '0 ITC'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {loading ? '...' : '0 ITC'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {loading ? '...' : '0 ITC'}
+                    </td>
                   </tr>
                   <tr>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                       New Users
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">3</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">18</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">67</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {loading ? '...' : '0'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {loading ? '...' : '0'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {loading ? '...' : '0'}
+                    </td>
                   </tr>
                 </tbody>
               </table>

@@ -93,8 +93,15 @@ class AdminStatsService {
 
       const invoices = await invoiceContract.getAllInvoices();
       console.log('AdminStats: All invoices:', invoices);
+      
+      // Ensure invoices is an array
+      if (!Array.isArray(invoices)) {
+        console.warn('AdminStats: Invoices is not an array, returning 0');
+        return 0;
+      }
+      
       // Count only paid invoices as sales
-      const paidInvoices = invoices.filter((invoice: any) => invoice.isPaid);
+      const paidInvoices = invoices.filter((invoice: any) => invoice && invoice.isPaid === true);
       console.log('AdminStats: Paid invoices count:', paidInvoices.length);
       return paidInvoices.length;
     } catch (error) {
@@ -116,6 +123,14 @@ class AdminStatsService {
       }
 
       const invoices = await invoiceContract.getAllInvoices();
+      console.log('AdminStats: All invoices for transactions:', invoices);
+      
+      // Ensure invoices is an array
+      if (!Array.isArray(invoices)) {
+        console.warn('AdminStats: Invoices is not an array, returning 0');
+        return 0;
+      }
+      
       const invoiceCount = invoices.length;
       console.log('AdminStats: Total invoices count:', invoiceCount);
 
@@ -137,15 +152,24 @@ class AdminStatsService {
       if (!invoiceContract) return '0';
 
       const invoices = await invoiceContract.getAllInvoices();
+      console.log('AdminStats: All invoices for revenue:', invoices);
+      
+      // Ensure invoices is an array
+      if (!Array.isArray(invoices)) {
+        console.warn('AdminStats: Invoices is not an array, returning 0');
+        return '0';
+      }
+      
       let totalRevenue = 0n;
 
       // Sum up all paid invoices
       for (const invoice of invoices) {
-        if (invoice.isPaid) {
+        if (invoice && invoice.isPaid === true && invoice.totalAmount) {
           totalRevenue += BigInt(invoice.totalAmount);
         }
       }
 
+      console.log('AdminStats: Total revenue in wei:', totalRevenue.toString());
       // Convert from wei to ETH (assuming token amounts are in wei)
       return ethers.formatEther(totalRevenue);
     } catch (error) {
@@ -165,6 +189,14 @@ class AdminStatsService {
       if (!clientsContract || !companyContract) return 0;
 
       const companies = await companyContract.getAllCompanies();
+      console.log('AdminStats: All companies for active users:', companies);
+      
+      // Ensure companies is an array
+      if (!Array.isArray(companies)) {
+        console.warn('AdminStats: Companies is not an array, returning 0');
+        return 0;
+      }
+      
       const uniqueClients = new Set<string>();
 
       // Get all unique clients from all companies
@@ -173,9 +205,12 @@ class AdminStatsService {
           const companyId = companies.indexOf(company);
           const clients = await clientsContract.getActiveClientsByCompany(companyId);
           
-          for (const client of clients) {
-            if (client.isActive) {
-              uniqueClients.add(client.clientAddress);
+          // Ensure clients is an array
+          if (Array.isArray(clients)) {
+            for (const client of clients) {
+              if (client && client.isActive === true && client.clientAddress) {
+                uniqueClients.add(client.clientAddress);
+              }
             }
           }
         } catch (error) {
@@ -183,6 +218,7 @@ class AdminStatsService {
         }
       }
 
+      console.log('AdminStats: Unique active users count:', uniqueClients.size);
       return uniqueClients.size;
     } catch (error) {
       console.error('Error getting active users:', error);
@@ -203,7 +239,14 @@ class AdminStatsService {
 
       const count = await companyContract.getCompanyCount();
       const countNumber = parseInt(count.toString());
-      console.log('AdminStats: Company count from contract:', countNumber);
+      console.log('AdminStats: Company count from contract:', countNumber, 'Raw count:', count);
+      
+      // Ensure we return 0 if count is NaN or invalid
+      if (isNaN(countNumber) || countNumber < 0) {
+        console.warn('AdminStats: Invalid company count, returning 0');
+        return 0;
+      }
+      
       return countNumber;
     } catch (error) {
       console.error('Error getting total companies:', error);
@@ -224,7 +267,14 @@ class AdminStatsService {
 
       const count = await productsContract.getProductCount();
       const countNumber = parseInt(count.toString());
-      console.log('AdminStats: Product count from contract:', countNumber);
+      console.log('AdminStats: Product count from contract:', countNumber, 'Raw count:', count);
+      
+      // Ensure we return 0 if count is NaN or invalid
+      if (isNaN(countNumber) || countNumber < 0) {
+        console.warn('AdminStats: Invalid product count, returning 0');
+        return 0;
+      }
+      
       return countNumber;
     } catch (error) {
       console.error('Error getting total products:', error);

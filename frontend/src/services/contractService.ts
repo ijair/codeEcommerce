@@ -39,9 +39,11 @@ export const CONTRACT_ABIS = {
   
   Company: [
     'function createCompany(string memory name) returns (uint256)',
+    'function createCompanyForOwner(string memory name, address owner) returns (uint256)',
     'function updateCompany(uint256 companyId, string memory newName) returns (bool)',
     'function deactivateCompany(uint256 companyId) returns (bool)',
     'function reactivateCompany(uint256 companyId) returns (bool)',
+    'function transferCompanyOwnership(uint256 companyId, address newOwner)',
     'function getCompany(uint256 companyId) view returns (tuple(address owner, string name, bool isActive, uint256 createdAt, uint256 updatedAt))',
     'function getAllCompanies() view returns (tuple(address owner, string name, bool isActive, uint256 createdAt, uint256 updatedAt)[])',
     'function getCompaniesByOwner(address ownerAddress) view returns (tuple(address owner, string name, bool isActive, uint256 createdAt, uint256 updatedAt)[])',
@@ -53,10 +55,12 @@ export const CONTRACT_ABIS = {
     'event CompanyUpdated(uint256 indexed id, string newName)',
     'event CompanyDeactivated(uint256 indexed id)',
     'event CompanyReactivated(uint256 indexed id)',
+    'event CompanyOwnershipTransferred(uint256 indexed companyId, address indexed oldOwner, address indexed newOwner)',
   ],
 
   Products: [
     'function createProduct(uint256 companyId, string memory name, uint256 price, string memory image, uint256 stock) returns (uint256)',
+    'function createProductForCompany(uint256 companyId, string memory name, uint256 price, string memory image, uint256 stock) returns (uint256)',
     'function updateProduct(uint256 productId, string memory name, uint256 price, string memory image)',
     'function deactivateProduct(uint256 productId)',
     'function reactivateProduct(uint256 productId)',
@@ -65,8 +69,6 @@ export const CONTRACT_ABIS = {
     'function getProductsByCompany(uint256 companyId) view returns (tuple(uint256 id, uint256 companyId, string name, uint256 price, string image, uint256 stock, uint256 createdAt, uint256 updatedAt, bool isActive)[])',
     'function getActiveProducts() view returns (tuple(uint256 id, uint256 companyId, string name, uint256 price, string image, uint256 stock, uint256 createdAt, uint256 updatedAt, bool isActive)[])',
     'function getProductsWithFilter(string memory filter) view returns (tuple(uint256 id, uint256 companyId, string name, uint256 price, string image, uint256 stock, uint256 createdAt, uint256 updatedAt, bool isActive)[])',
-    'function getProductsByPriceRange(uint256 minPrice, uint256 maxPrice) view returns (tuple(uint256 id, uint256 companyId, string name, uint256 price, string image, uint256 stock, uint256 createdAt, uint256 updatedAt, bool isActive)[])',
-    'function searchProducts(string memory query) view returns (tuple(uint256 id, uint256 companyId, string name, uint256 price, string image, uint256 stock, uint256 createdAt, uint256 updatedAt, bool isActive)[])',
     'function updateProductStock(uint256 productId, uint256 quantity)',
     'function addProductStock(uint256 productId, uint256 quantity)',
     'function purchaseProduct(uint256 productId, uint256 quantity)',

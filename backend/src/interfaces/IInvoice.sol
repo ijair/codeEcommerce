@@ -113,6 +113,23 @@ interface IInvoice {
     ) external returns (uint256 invoiceId);
 
     /**
+     * @dev Create a new invoice for client purchase (anyone can call this)
+     * @param companyId ID of the company
+     * @param number Invoice number
+     * @param clientAddress Address of the client (must be msg.sender)
+     * @param items Array of invoice items (products and quantities)
+     * @param useTokens Whether to deduct tokens from client's balance
+     * @return invoiceId Unique identifier for the created invoice
+     */
+    function createInvoiceForPurchase(
+        uint256 companyId,
+        uint256 number,
+        address clientAddress,
+        InvoiceItem[] memory items,
+        bool useTokens
+    ) external returns (uint256 invoiceId);
+
+    /**
      * @dev Get invoice items
      * @param invoiceId Unique identifier for the invoice
      * @return items Array of invoice items

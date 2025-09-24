@@ -26,6 +26,24 @@ contract ITCToken20 is ERC20, Ownable, ReentrancyGuard, IITCToken20 {
     // Gas fee estimate for transactions
     uint256 public gasFeeEstimate = 0.002 ether; // Estimated gas fee
     
+    // Burn tracking variables
+    uint256 public totalTokensBurned = 0; // Total amount of tokens burned
+    uint256 public totalBurnTransactions = 0; // Total number of burn transactions
+    
+    // Burn record structure
+    struct BurnRecord {
+        address burner;
+        uint256 amount;
+        uint256 timestamp;
+        uint256 burnId;
+    }
+    
+    // Mapping to store burn records
+    mapping(uint256 => BurnRecord) public burnRecords;
+    
+    // Array to store all burn IDs for enumeration
+    uint256[] public allBurnIds;
+    
     // Events are inherited from IITCToken20 interface
     
     /**
@@ -169,6 +187,23 @@ contract ITCToken20 is ERC20, Ownable, ReentrancyGuard, IITCToken20 {
         require(balanceOf(from) >= amount, "ITCToken20: Insufficient balance to burn");
         
         _burn(from, amount);
+        
+        // Record the burn transaction
+        _recordBurn(from, amount);
+    }
+
+    /**
+     * @dev Self-burn tokens - allows users to burn their own tokens
+     * @param amount Amount of tokens to burn
+     */
+    function selfBurn(uint256 amount) external {
+        require(amount > 0, "ITCToken20: Amount must be greater than zero");
+        require(balanceOf(msg.sender) >= amount, "ITCToken20: Insufficient balance to burn");
+        
+        _burn(msg.sender, amount);
+        
+        // Record the burn transaction
+        _recordBurn(msg.sender, amount);
     }
 
     /**
@@ -298,5 +333,115 @@ contract ITCToken20 is ERC20, Ownable, ReentrancyGuard, IITCToken20 {
     function setGasFeeEstimate(uint256 gasFee) external override onlyOwner {
         require(gasFee <= 0.1 ether, "ITCToken20: Gas fee estimate too high");
         gasFeeEstimate = gasFee;
+    }
+
+    /**
+     * @dev Internal function to record burn transactions
+     * @param burner Address of the user who burned tokens
+     * @param amount Amount of tokens burned
+     */
+    function _recordBurn(address burner, uint256 amount) internal {
+        // Increment counters
+        totalBurnTransactions++;
+        totalTokensBurned += amount;
+        
+        // Create burn record
+        uint256 burnId = totalBurnTransactions;
+        burnRecords[burnId] = BurnRecord({
+            burner: burner,
+            amount: amount,
+            timestamp: block.timestamp,
+            burnId: burnId
+        });
+        
+        // Add to all burn IDs array
+        allBurnIds.push(burnId);
+        
+        // Emit event with detailed information
+        emit TokensBurned(burner, amount, burnId, block.timestamp, totalTokensBurned);
+    }
+
+    /**
+     * @dev Get burn record by ID
+     * @param burnId ID of the burn record
+     * @return burner Address of the burner
+     * @return amount Amount burned
+     * @return timestamp When the burn occurred
+     * @return burnId The burn ID
+     */
+    function getBurnRecord(uint256 burnId) external view returns (address burner, uint256 amount, uint256 timestamp, uint256) {
+        require(burnId > 0 && burnId <= totalBurnTransactions, "ITCToken20: Invalid burn ID");
+        BurnRecord memory record = burnRecords[burnId];
+        return (record.burner, record.amount, record.timestamp, record.burnId);
+    }
+
+    /**
+     * @dev Get total number of burn transactions
+     * @return Total number of burn transactions
+     */
+    function getTotalBurnTransactions() external view returns (uint256) {
+        return totalBurnTransactions;
+    }
+
+    /**
+     * @dev Get total amount of tokens burned
+     * @return Total amount of tokens burned
+     */
+    function getTotalTokensBurned() external view returns (uint256) {
+        return totalTokensBurned;
+    }
+
+    /**
+     * @dev Get all burn IDs (for enumeration)
+     * @return Array of all burn IDs
+     */
+    function getAllBurnIds() external view returns (uint256[] memory) {
+        return allBurnIds;
+    }
+
+    /**
+     * @dev Get burn records in a range
+     * @param start Start index (0-based)
+     * @param end End index (exclusive)
+     * @return burners Array of burner addresses
+     * @return amounts Array of amounts burned
+     * @return timestamps Array of timestamps
+     * @return burnIds Array of burn IDs
+     */
+    function getBurnRecordsRange(uint256 start, uint256 end) external view returns (
+        address[] memory burners,
+        uint256[] memory amounts,
+        uint256[] memory timestamps,
+        uint256[] memory burnIds
+    ) {
+        require(start < totalBurnTransactions, "ITCToken20: Start index out of bounds");
+        require(end <= totalBurnTransactions && end > start, "ITCToken20: Invalid end index");
+        
+        uint256 length = end - start;
+        burners = new address[](length);
+        amounts = new uint256[](length);
+        timestamps = new uint256[](length);
+        burnIds = new uint256[](length);
+        
+        for (uint256 i = 0; i < length; i++) {
+            uint256 burnId = start + i + 1; // burnId is 1-based
+            BurnRecord memory record = burnRecords[burnId];
+            burners[i] = record.burner;
+            amounts[i] = record.amount;
+            timestamps[i] = record.timestamp;
+            burnIds[i] = record.burnId;
+        }
+    }
+
+    /**
+     * @dev Get burn statistics
+     * @return totalBurned Total amount of tokens burned
+     * @return totalTransactions Total number of burn transactions
+     * @return averageBurnAmount Average amount per burn transaction
+     */
+    function getBurnStatistics() external view returns (uint256 totalBurned, uint256 totalTransactions, uint256 averageBurnAmount) {
+        totalBurned = totalTokensBurned;
+        totalTransactions = totalBurnTransactions;
+        averageBurnAmount = totalTransactions > 0 ? totalBurned / totalTransactions : 0;
     }
 }

@@ -32,6 +32,16 @@ interface IITCToken20 is IERC20 {
     event TokenPriceUpdated(uint256 newPrice);
 
     /**
+     * @dev Emitted when tokens are burned
+     * @param burner Address of the user who burned tokens
+     * @param amount Amount of tokens burned
+     * @param burnId Unique ID for this burn transaction
+     * @param timestamp When the burn occurred
+     * @param totalBurned Total amount of tokens burned so far
+     */
+    event TokensBurned(address indexed burner, uint256 amount, uint256 burnId, uint256 timestamp, uint256 totalBurned);
+
+    /**
      * @dev Purchase tokens with ETH (transfers from owner balance)
      * @notice Users can buy tokens after Stripe payment confirmation
      */
@@ -129,4 +139,62 @@ interface IITCToken20 is IERC20 {
      * @return remainingSupply Remaining supply that can be minted
      */
     function getRemainingSupply() external view returns (uint256 remainingSupply);
+
+    /**
+     * @dev Self-burn tokens - allows users to burn their own tokens
+     * @param amount Amount of tokens to burn
+     */
+    function selfBurn(uint256 amount) external;
+
+    /**
+     * @dev Get burn record by ID
+     * @param burnId ID of the burn record
+     * @return burner Address of the burner
+     * @return amount Amount burned
+     * @return timestamp When the burn occurred
+     * @return burnId The burn ID
+     */
+    function getBurnRecord(uint256 burnId) external view returns (address burner, uint256 amount, uint256 timestamp, uint256);
+
+    /**
+     * @dev Get total number of burn transactions
+     * @return Total number of burn transactions
+     */
+    function getTotalBurnTransactions() external view returns (uint256);
+
+    /**
+     * @dev Get total amount of tokens burned
+     * @return Total amount of tokens burned
+     */
+    function getTotalTokensBurned() external view returns (uint256);
+
+    /**
+     * @dev Get all burn IDs (for enumeration)
+     * @return Array of all burn IDs
+     */
+    function getAllBurnIds() external view returns (uint256[] memory);
+
+    /**
+     * @dev Get burn records in a range
+     * @param start Start index (0-based)
+     * @param end End index (exclusive)
+     * @return burners Array of burner addresses
+     * @return amounts Array of amounts burned
+     * @return timestamps Array of timestamps
+     * @return burnIds Array of burn IDs
+     */
+    function getBurnRecordsRange(uint256 start, uint256 end) external view returns (
+        address[] memory burners,
+        uint256[] memory amounts,
+        uint256[] memory timestamps,
+        uint256[] memory burnIds
+    );
+
+    /**
+     * @dev Get burn statistics
+     * @return totalBurned Total amount of tokens burned
+     * @return totalTransactions Total number of burn transactions
+     * @return averageBurnAmount Average amount per burn transaction
+     */
+    function getBurnStatistics() external view returns (uint256 totalBurned, uint256 totalTransactions, uint256 averageBurnAmount);
 }

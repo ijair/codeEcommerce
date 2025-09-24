@@ -198,4 +198,239 @@ contract IntegrationTest is Test {
         vm.expectRevert("Products: Product does not exist");
         products.completePurchase(999, 1, customer1, 500 ether);
     }
+
+    // ===== NEW TESTS FOR BURN TRACKING INTEGRATION =====
+
+    function testTokenBurnTrackingIntegration() public {
+        // 1. Customer buys tokens
+        uint256 tokenAmount = 1000 * 10**18; // 1000 tokens
+        uint256 tokenCost = (tokenAmount * token.getTokenPrice()) / 1e18;
+        vm.deal(customer1, tokenCost + 1 ether);
+        
+        vm.prank(customer1);
+        token.buyTokens{value: tokenCost}();
+        
+        assertEq(token.balanceOf(customer1), tokenAmount);
+        
+        // 2. Verify initial burn tracking state
+        assertEq(token.getTotalBurnTransactions(), 0);
+        assertEq(token.getTotalTokensBurned(), 0);
+        
+        // 3. Customer burns some tokens using selfBurn
+        uint256 burnAmount = 200 * 10**18; // 200 tokens
+        
+        vm.prank(customer1);
+        token.selfBurn(burnAmount);
+        
+        // 4. Verify burn tracking was updated
+        assertEq(token.getTotalBurnTransactions(), 1);
+        assertEq(token.getTotalTokensBurned(), burnAmount);
+        assertEq(token.balanceOf(customer1), tokenAmount - burnAmount);
+        
+        // 5. Verify burn record exists
+        (address burner, uint256 amount, , uint256 burnId) = token.getBurnRecord(1);
+        assertEq(burner, customer1);
+        assertEq(amount, burnAmount);
+        assertEq(burnId, 1);
+        
+        // 6. Get burn statistics
+        (uint256 totalBurned, uint256 totalTransactions, uint256 averageBurnAmount) = token.getBurnStatistics();
+        assertEq(totalBurned, burnAmount);
+        assertEq(totalTransactions, 1);
+        assertEq(averageBurnAmount, burnAmount);
+    }
+
+    function testMultipleUsersBurnTracking() public {
+        // 1. Both customers buy tokens
+        uint256 tokenAmount = 1000 * 10**18;
+        uint256 tokenCost = (tokenAmount * token.getTokenPrice()) / 1e18;
+        
+        vm.deal(customer1, tokenCost + 1 ether);
+        vm.deal(customer2, tokenCost + 1 ether);
+        
+        vm.prank(customer1);
+        token.buyTokens{value: tokenCost}();
+        
+        vm.prank(customer2);
+        token.buyTokens{value: tokenCost}();
+        
+        // 2. Customer1 burns tokens
+        uint256 burnAmount1 = 300 * 10**18;
+        vm.prank(customer1);
+        token.selfBurn(burnAmount1);
+        
+        // 3. Customer2 burns tokens
+        uint256 burnAmount2 = 150 * 10**18;
+        vm.prank(customer2);
+        token.selfBurn(burnAmount2);
+        
+        // 4. Verify cumulative tracking
+        assertEq(token.getTotalBurnTransactions(), 2);
+        assertEq(token.getTotalTokensBurned(), burnAmount1 + burnAmount2);
+        
+        // 5. Verify individual burn records
+        (address burner1, uint256 amount1, , uint256 burnId1) = token.getBurnRecord(1);
+        assertEq(burner1, customer1);
+        assertEq(amount1, burnAmount1);
+        assertEq(burnId1, 1);
+        
+        (address burner2, uint256 amount2, , uint256 burnId2) = token.getBurnRecord(2);
+        assertEq(burner2, customer2);
+        assertEq(amount2, burnAmount2);
+        assertEq(burnId2, 2);
+        
+        // 6. Test burn records range
+        (address[] memory burners, uint256[] memory amounts, , uint256[] memory burnIds) = token.getBurnRecordsRange(0, 2);
+        assertEq(burners.length, 2);
+        assertEq(amounts.length, 2);
+        assertEq(burnIds.length, 2);
+        assertEq(burners[0], customer1);
+        assertEq(burners[1], customer2);
+        assertEq(amounts[0], burnAmount1);
+        assertEq(amounts[1], burnAmount2);
+    }
+
+    function testBurnTrackingWithWithdrawTokens() public {
+        // 1. Customer buys tokens
+        uint256 tokenAmount = 1000 * 10**18;
+        uint256 tokenCost = (tokenAmount * token.getTokenPrice()) / 1e18;
+        vm.deal(customer1, tokenCost + 1 ether);
+        
+        vm.prank(customer1);
+        token.buyTokens{value: tokenCost}();
+        
+        // 2. Customer withdraws tokens (this should trigger burn tracking)
+        uint256 withdrawAmount = 400 * 10**18;
+        
+        uint256 initialBurnTransactions = token.getTotalBurnTransactions();
+        uint256 initialTotalBurned = token.getTotalTokensBurned();
+        
+        vm.prank(customer1);
+        token.withdrawTokens(withdrawAmount);
+        
+        // 3. Note: withdrawTokens does NOT track burns - only burn() and selfBurn() do
+        // So burn tracking should remain unchanged
+        assertEq(token.getTotalBurnTransactions(), initialBurnTransactions);
+        assertEq(token.getTotalTokensBurned(), initialTotalBurned);
+        
+        // 5. Verify remaining balance
+        assertEq(token.balanceOf(customer1), tokenAmount - withdrawAmount);
+    }
+
+    function testCompleteEcommerceFlowWithBurnTracking() public {
+        // 1. Customer buys tokens
+        uint256 tokenAmount = 2000 * 10**18; // 2000 tokens
+        uint256 tokenCost = (tokenAmount * token.getTokenPrice()) / 1e18;
+        vm.deal(customer1, tokenCost + 2 ether);
+        
+        vm.prank(customer1);
+        token.buyTokens{value: tokenCost}();
+        
+        assertEq(token.balanceOf(customer1), tokenAmount);
+        
+        // 2. Customer burns some tokens
+        uint256 burnAmount = 500 * 10**18;
+        vm.prank(customer1);
+        token.selfBurn(burnAmount);
+        
+        assertEq(token.getTotalBurnTransactions(), 1);
+        assertEq(token.getTotalTokensBurned(), burnAmount);
+        assertEq(token.balanceOf(customer1), tokenAmount - burnAmount);
+        
+        // 3. Customer purchases a product
+        uint256 productId = productId1;
+        uint256 quantity = 1;
+        uint256 productPrice = 300 * 10**18; // 300 ITC tokens
+        
+        // Transfer tokens to customer (simulating payment)
+        vm.prank(owner);
+        token.transfer(customer1, productPrice);
+        
+        // Purchase product
+        vm.prank(customer1);
+        products.completePurchase(productId, quantity, customer1, productPrice);
+        
+        // 4. Customer burns more tokens
+        uint256 additionalBurn = 200 * 10**18;
+        vm.prank(customer1);
+        token.selfBurn(additionalBurn);
+        
+        // 5. Verify final burn tracking state
+        assertEq(token.getTotalBurnTransactions(), 2);
+        assertEq(token.getTotalTokensBurned(), burnAmount + additionalBurn);
+        
+        // 6. Verify burn statistics
+        (uint256 totalBurned, uint256 totalTransactions, uint256 averageBurnAmount) = token.getBurnStatistics();
+        assertEq(totalBurned, burnAmount + additionalBurn);
+        assertEq(totalTransactions, 2);
+        assertEq(averageBurnAmount, (burnAmount + additionalBurn) / 2);
+        
+        // 7. Verify all burn IDs
+        uint256[] memory allBurnIds = token.getAllBurnIds();
+        assertEq(allBurnIds.length, 2);
+        assertEq(allBurnIds[0], 1);
+        assertEq(allBurnIds[1], 2);
+    }
+
+    function testBurnTrackingWithCompanyOwners() public {
+        // 1. Company owners buy and burn tokens
+        uint256 tokenAmount = 500 * 10**18;
+        uint256 tokenCost = (tokenAmount * token.getTokenPrice()) / 1e18;
+        
+        vm.deal(companyOwner1, tokenCost + 1 ether);
+        vm.deal(companyOwner2, tokenCost + 1 ether);
+        
+        vm.prank(companyOwner1);
+        token.buyTokens{value: tokenCost}();
+        
+        vm.prank(companyOwner2);
+        token.buyTokens{value: tokenCost}();
+        
+        // 2. Company owners burn tokens
+        uint256 burnAmount1 = 100 * 10**18;
+        uint256 burnAmount2 = 150 * 10**18;
+        
+        vm.prank(companyOwner1);
+        token.selfBurn(burnAmount1);
+        
+        vm.prank(companyOwner2);
+        token.selfBurn(burnAmount2);
+        
+        // 3. Verify tracking
+        assertEq(token.getTotalBurnTransactions(), 2);
+        assertEq(token.getTotalTokensBurned(), burnAmount1 + burnAmount2);
+        
+        // 4. Test burn records range for company owners
+        (address[] memory burners, uint256[] memory amounts, , ) = token.getBurnRecordsRange(0, 2);
+        assertEq(burners.length, 2);
+        assertEq(amounts.length, 2);
+        assertEq(burners[0], companyOwner1);
+        assertEq(burners[1], companyOwner2);
+        assertEq(amounts[0], burnAmount1);
+        assertEq(amounts[1], burnAmount2);
+    }
+
+    function testBurnTrackingErrorHandling() public {
+        // 1. Try to burn tokens without having any
+        vm.prank(customer1);
+        vm.expectRevert("ITCToken20: Insufficient balance to burn");
+        token.selfBurn(100 * 10**18);
+        
+        // 2. Try to burn zero tokens
+        vm.prank(customer1);
+        vm.expectRevert("ITCToken20: Amount must be greater than zero");
+        token.selfBurn(0);
+        
+        // 3. Verify no burns were recorded
+        assertEq(token.getTotalBurnTransactions(), 0);
+        assertEq(token.getTotalTokensBurned(), 0);
+        
+        // 4. Try to get burn record with invalid ID
+        vm.expectRevert("ITCToken20: Invalid burn ID");
+        token.getBurnRecord(1);
+        
+        // 5. Try to get burn records range with invalid bounds
+        vm.expectRevert("ITCToken20: Start index out of bounds");
+        token.getBurnRecordsRange(1, 2);
+    }
 }

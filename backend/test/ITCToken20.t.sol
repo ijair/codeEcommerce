@@ -16,12 +16,13 @@ contract ITCToken20Test is Test {
     address public user1;
     address public user2;
     
-    uint256 public constant INITIAL_SUPPLY = 100_000 * 10**18; // 10% of max supply
+    uint256 public constant INITIAL_SUPPLY = 1_000_000 * 10**18; // Full max supply minted to owner
     uint256 public constant MAX_SUPPLY = 1_000_000 * 10**18;
     uint256 public constant TOKEN_PRICE = 0.001 ether;
 
     event TokensPurchased(address indexed buyer, uint256 amount, uint256 ethAmount);
     event TokensWithdrawn(address indexed seller, uint256 amount, uint256 ethAmount);
+    event TokensBurned(address indexed burner, uint256 amount, uint256 burnId, uint256 timestamp, uint256 totalBurned);
     event TokenPriceUpdated(uint256 newPrice);
 
     function setUp() public {
@@ -44,7 +45,11 @@ contract ITCToken20Test is Test {
         assertEq(token.balanceOf(owner), INITIAL_SUPPLY);
         assertEq(token.getTokenPrice(), TOKEN_PRICE);
         assertEq(token.getMaxSupply(), MAX_SUPPLY);
-        assertEq(token.getRemainingSupply(), MAX_SUPPLY - INITIAL_SUPPLY);
+        assertEq(token.getRemainingSupply(), 0); // No remaining supply since all is minted
+        
+        // Test initial burn tracking state
+        assertEq(token.getTotalBurnTransactions(), 0);
+        assertEq(token.getTotalTokensBurned(), 0);
     }
 
     function testBuyTokens() public {
@@ -67,7 +72,7 @@ contract ITCToken20Test is Test {
 
     function testBuyTokensZeroETH() public {
         vm.prank(user1);
-        vm.expectRevert("ITCToken20: Debes enviar ETH");
+        vm.expectRevert("ITCToken20: Amount must be greater than zero");
         token.buyTokens{value: 0}();
     }
 
@@ -80,7 +85,7 @@ contract ITCToken20Test is Test {
         vm.deal(user1, ethAmount);
         
         vm.prank(user1);
-        vm.expectRevert("ITCToken20: No hay suficientes tokens disponibles");
+        vm.expectRevert("ITCToken20: Insufficient tokens available");
         token.buyTokens{value: ethAmount}();
     }
 
@@ -165,12 +170,16 @@ contract ITCToken20Test is Test {
     }
 
     function testMint() public {
+        // First burn some tokens to make space for minting
+        uint256 burnAmount = 10000 * 10**18;
+        token.burn(owner, burnAmount);
+        
         uint256 amount = 1000 * 10**18;
         
         token.mint(user1, amount);
         
         assertEq(token.balanceOf(user1), amount);
-        assertEq(token.totalSupply(), INITIAL_SUPPLY + amount);
+        assertEq(token.totalSupply(), INITIAL_SUPPLY - burnAmount + amount);
     }
 
     function testMintExceedsMaxSupply() public {
@@ -189,14 +198,14 @@ contract ITCToken20Test is Test {
     function testBurn() public {
         uint256 amount = 1000 * 10**18;
         
-        // First mint some tokens to user1
-        token.mint(user1, amount);
+        // Transfer some tokens from owner to user1
+        token.transfer(user1, amount);
         
         // Then burn them
         token.burn(user1, amount);
         
         assertEq(token.balanceOf(user1), 0);
-        assertEq(token.totalSupply(), INITIAL_SUPPLY);
+        assertEq(token.totalSupply(), INITIAL_SUPPLY - amount);
     }
 
     function testBurnInsufficientBalance() public {
@@ -213,6 +222,10 @@ contract ITCToken20Test is Test {
     // ===== NEW TESTS FOR FULLFILL TOKENS =====
 
     function testFullFillTokens() public {
+        // First burn some tokens to make space for minting
+        uint256 burnAmount = 10000 * 10**18;
+        token.burn(owner, burnAmount);
+        
         uint256 ethAmount = 2 ether;
         uint256 expectedTokens = (ethAmount * 1e18) / TOKEN_PRICE;
         uint256 initialSupply = token.totalSupply();
@@ -230,7 +243,7 @@ contract ITCToken20Test is Test {
     }
 
     function testFullFillTokensZeroETH() public {
-        vm.expectRevert("ITCToken20: Debes enviar ETH");
+        vm.expectRevert("ITCToken20: Amount must be greater than zero");
         token.fullFillTokens{value: 0}();
     }
 
@@ -251,6 +264,10 @@ contract ITCToken20Test is Test {
     }
 
     function testCompleteWorkflowFullFillAndBuy() public {
+        // First burn some tokens to make space for minting
+        uint256 burnAmount = 50000 * 10**18;
+        token.burn(owner, burnAmount);
+        
         // Step 1: Owner fills more tokens
         uint256 ownerETH = 5 ether;
         uint256 expectedOwnerTokens = (ownerETH * 1e18) / TOKEN_PRICE;
@@ -526,5 +543,285 @@ contract ITCToken20Test is Test {
         assertEq(netAmount, expectedNetAmount);
         assertEq(stripeFee, expectedStripeFee);
         assertEq(gasFee, expectedGasFee);
+    }
+
+    // ===== NEW TESTS FOR BURN TRACKING =====
+
+    function testSelfBurn() public {
+        // Transfer some tokens from owner to user1
+        uint256 burnAmount = 1000 * 10**18;
+        token.transfer(user1, burnAmount);
+        
+        uint256 initialSupply = token.totalSupply();
+        uint256 initialTotalBurned = token.getTotalTokensBurned();
+        uint256 initialTotalTransactions = token.getTotalBurnTransactions();
+        
+        // Expect TokensBurned event
+        vm.expectEmit(true, false, false, true);
+        emit TokensBurned(user1, burnAmount, 1, block.timestamp, burnAmount);
+        
+        vm.prank(user1);
+        token.selfBurn(burnAmount);
+        
+        // Verify token balance
+        assertEq(token.balanceOf(user1), 0);
+        assertEq(token.totalSupply(), initialSupply - burnAmount);
+        
+        // Verify burn tracking
+        assertEq(token.getTotalTokensBurned(), initialTotalBurned + burnAmount);
+        assertEq(token.getTotalBurnTransactions(), initialTotalTransactions + 1);
+    }
+
+    function testSelfBurnZeroAmount() public {
+        vm.prank(user1);
+        vm.expectRevert("ITCToken20: Amount must be greater than zero");
+        token.selfBurn(0);
+    }
+
+    function testSelfBurnInsufficientBalance() public {
+        vm.prank(user1);
+        vm.expectRevert("ITCToken20: Insufficient balance to burn");
+        token.selfBurn(1000 * 10**18);
+    }
+
+    function testBurnWithTracking() public {
+        // Transfer some tokens from owner to user1
+        uint256 burnAmount = 1000 * 10**18;
+        token.transfer(user1, burnAmount);
+        
+        uint256 initialSupply = token.totalSupply();
+        uint256 initialTotalBurned = token.getTotalTokensBurned();
+        uint256 initialTotalTransactions = token.getTotalBurnTransactions();
+        
+        // Expect TokensBurned event
+        vm.expectEmit(true, false, false, true);
+        emit TokensBurned(user1, burnAmount, 1, block.timestamp, burnAmount);
+        
+        token.burn(user1, burnAmount);
+        
+        // Verify token balance
+        assertEq(token.balanceOf(user1), 0);
+        assertEq(token.totalSupply(), initialSupply - burnAmount);
+        
+        // Verify burn tracking
+        assertEq(token.getTotalTokensBurned(), initialTotalBurned + burnAmount);
+        assertEq(token.getTotalBurnTransactions(), initialTotalTransactions + 1);
+    }
+
+    function testBurnTrackingMultipleBurns() public {
+        // Transfer tokens to both users
+        uint256 amount1 = 1000 * 10**18;
+        uint256 amount2 = 500 * 10**18;
+        
+        token.transfer(user1, amount1);
+        token.transfer(user2, amount2);
+        
+        uint256 initialTotalBurned = token.getTotalTokensBurned();
+        uint256 initialTotalTransactions = token.getTotalBurnTransactions();
+        
+        // First burn
+        vm.expectEmit(true, false, false, true);
+        emit TokensBurned(user1, amount1, 1, block.timestamp, amount1);
+        
+        vm.prank(user1);
+        token.selfBurn(amount1);
+        
+        // Second burn
+        vm.expectEmit(true, false, false, true);
+        emit TokensBurned(user2, amount2, 2, block.timestamp, amount1 + amount2);
+        
+        vm.prank(user2);
+        token.selfBurn(amount2);
+        
+        // Verify cumulative tracking
+        assertEq(token.getTotalTokensBurned(), initialTotalBurned + amount1 + amount2);
+        assertEq(token.getTotalBurnTransactions(), initialTotalTransactions + 2);
+    }
+
+    function testGetBurnRecord() public {
+        // Transfer and burn tokens
+        uint256 burnAmount = 1000 * 10**18;
+        token.transfer(user1, burnAmount);
+        
+        vm.prank(user1);
+        token.selfBurn(burnAmount);
+        
+        // Get burn record
+        (address burner, uint256 amount, uint256 timestamp, uint256 burnId) = token.getBurnRecord(1);
+        
+        assertEq(burner, user1);
+        assertEq(amount, burnAmount);
+        assertEq(timestamp, block.timestamp);
+        assertEq(burnId, 1);
+    }
+
+    function testGetBurnRecordInvalidId() public {
+        vm.expectRevert("ITCToken20: Invalid burn ID");
+        token.getBurnRecord(1); // No burns yet
+        
+        vm.expectRevert("ITCToken20: Invalid burn ID");
+        token.getBurnRecord(999); // Invalid ID
+    }
+
+    function testGetBurnRecordsRange() public {
+        // Create multiple burns
+        uint256 amount1 = 1000 * 10**18;
+        uint256 amount2 = 500 * 10**18;
+        uint256 amount3 = 250 * 10**18;
+        
+        token.transfer(user1, amount1);
+        token.transfer(user2, amount2);
+        token.transfer(user1, amount3);
+        
+        vm.prank(user1);
+        token.selfBurn(amount1);
+        
+        vm.prank(user2);
+        token.selfBurn(amount2);
+        
+        vm.prank(user1);
+        token.selfBurn(amount3);
+        
+        // Get range of burn records (1-3)
+        (address[] memory burners, uint256[] memory amounts, uint256[] memory timestamps, uint256[] memory burnIds) = token.getBurnRecordsRange(0, 3);
+        
+        assertEq(burners.length, 3);
+        assertEq(amounts.length, 3);
+        assertEq(timestamps.length, 3);
+        assertEq(burnIds.length, 3);
+        
+        // Check first burn
+        assertEq(burners[0], user1);
+        assertEq(amounts[0], amount1);
+        assertEq(burnIds[0], 1);
+        
+        // Check second burn
+        assertEq(burners[1], user2);
+        assertEq(amounts[1], amount2);
+        assertEq(burnIds[1], 2);
+        
+        // Check third burn
+        assertEq(burners[2], user1);
+        assertEq(amounts[2], amount3);
+        assertEq(burnIds[2], 3);
+    }
+
+    function testGetBurnRecordsRangeInvalidBounds() public {
+        vm.expectRevert("ITCToken20: Start index out of bounds");
+        token.getBurnRecordsRange(1, 2); // No burns yet
+        
+        // Create one burn
+        token.transfer(user1, 1000 * 10**18);
+        vm.prank(user1);
+        token.selfBurn(1000 * 10**18);
+        
+        vm.expectRevert("ITCToken20: Invalid end index");
+        token.getBurnRecordsRange(0, 0); // End <= start
+    }
+
+    function testGetBurnStatistics() public {
+        // Create multiple burns with different amounts
+        uint256 amount1 = 1000 * 10**18;
+        uint256 amount2 = 500 * 10**18;
+        uint256 amount3 = 250 * 10**18;
+        
+        token.transfer(user1, amount1);
+        token.transfer(user2, amount2);
+        token.transfer(user1, amount3);
+        
+        vm.prank(user1);
+        token.selfBurn(amount1);
+        
+        vm.prank(user2);
+        token.selfBurn(amount2);
+        
+        vm.prank(user1);
+        token.selfBurn(amount3);
+        
+        // Get statistics
+        (uint256 totalBurned, uint256 totalTransactions, uint256 averageBurnAmount) = token.getBurnStatistics();
+        
+        uint256 expectedTotal = amount1 + amount2 + amount3;
+        uint256 expectedAverage = expectedTotal / 3;
+        
+        assertEq(totalBurned, expectedTotal);
+        assertEq(totalTransactions, 3);
+        assertEq(averageBurnAmount, expectedAverage);
+    }
+
+    function testGetBurnStatisticsNoBurns() public {
+        (uint256 totalBurned, uint256 totalTransactions, uint256 averageBurnAmount) = token.getBurnStatistics();
+        
+        assertEq(totalBurned, 0);
+        assertEq(totalTransactions, 0);
+        assertEq(averageBurnAmount, 0);
+    }
+
+    function testGetAllBurnIds() public {
+        // Initially empty
+        uint256[] memory ids = token.getAllBurnIds();
+        assertEq(ids.length, 0);
+        
+        // Create burns
+        token.transfer(user1, 1000 * 10**18);
+        token.transfer(user2, 500 * 10**18);
+        
+        vm.prank(user1);
+        token.selfBurn(1000 * 10**18);
+        
+        vm.prank(user2);
+        token.selfBurn(500 * 10**18);
+        
+        // Get all IDs
+        ids = token.getAllBurnIds();
+        assertEq(ids.length, 2);
+        assertEq(ids[0], 1);
+        assertEq(ids[1], 2);
+    }
+
+    function testBurnTrackingWithWithdrawTokens() public {
+        // Buy tokens first
+        uint256 ethAmount = 1 ether;
+        uint256 expectedTokens = (ethAmount * 1e18) / TOKEN_PRICE;
+        vm.deal(user1, ethAmount);
+        
+        vm.prank(user1);
+        token.buyTokens{value: ethAmount}();
+        
+        uint256 initialTotalBurned = token.getTotalTokensBurned();
+        uint256 initialTotalTransactions = token.getTotalBurnTransactions();
+        
+        // Withdraw tokens (this should trigger burn tracking)
+        uint256 withdrawAmount = expectedTokens / 2;
+        
+        vm.prank(user1);
+        token.withdrawTokens(withdrawAmount);
+        
+        // Note: withdrawTokens does NOT track burns - only burn() and selfBurn() do
+        // So burn tracking should remain unchanged
+        assertEq(token.getTotalTokensBurned(), initialTotalBurned);
+        assertEq(token.getTotalBurnTransactions(), initialTotalTransactions);
+    }
+
+    function testFuzzSelfBurn(uint256 mintAmount, uint256 burnAmount) public {
+        // Set reasonable bounds
+        mintAmount = bound(mintAmount, 1000 * 10**18, 10000 * 10**18);
+        burnAmount = bound(burnAmount, 100 * 10**18, mintAmount);
+        
+        // Transfer tokens to user1
+        token.transfer(user1, mintAmount);
+        
+        uint256 initialTotalBurned = token.getTotalTokensBurned();
+        uint256 initialTotalTransactions = token.getTotalBurnTransactions();
+        uint256 initialSupply = token.totalSupply();
+        
+        vm.prank(user1);
+        token.selfBurn(burnAmount);
+        
+        // Verify burn tracking
+        assertEq(token.getTotalTokensBurned(), initialTotalBurned + burnAmount);
+        assertEq(token.getTotalBurnTransactions(), initialTotalTransactions + 1);
+        assertEq(token.totalSupply(), initialSupply - burnAmount);
+        assertEq(token.balanceOf(user1), mintAmount - burnAmount);
     }
 }

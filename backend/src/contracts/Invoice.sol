@@ -139,7 +139,7 @@ contract Invoice is Ownable, IInvoice {
     }
 
     /**
-     * @dev Create a new invoice with products and handle stock/token updates
+     * @dev Create a new invoice with products and handle stock/token updates (company owner only)
      * @param companyId ID of the company creating the invoice
      * @param number Invoice number
      * @param clientAddress Address of the client
@@ -171,6 +171,109 @@ contract Invoice is Ownable, IInvoice {
             // Check if product exists and has sufficient stock
             if (address(productsContract) != address(0)) {
                 require(productsContract.productExists(items[i].productId), "Invoice: Product does not exist");
+                require(
+                    productsContract.hasStockAvailable(items[i].productId, items[i].quantity),
+                    "Invoice: Insufficient stock"
+                );
+            }
+            
+            totalAmount += items[i].totalPrice;
+        }
+        
+        require(totalAmount > 0, "Invoice: Total amount must be greater than zero");
+        
+        // If using tokens, check balance and deduct tokens
+        if (useTokens && address(tokenContract) != address(0)) {
+            require(
+                tokenContract.balanceOf(clientAddress) >= totalAmount,
+                "Invoice: Insufficient token balance"
+            );
+            
+            // Transfer tokens from client to company owner
+            bool transferSuccess = tokenContract.transferFrom(clientAddress, company.owner, totalAmount);
+            require(transferSuccess, "Invoice: Token transfer failed");
+        }
+        
+        // Create invoice
+        invoiceCounter++;
+        invoiceId = invoiceCounter;
+        
+        invoices[invoiceId] = InvoiceData({
+            id: invoiceId,
+            companyId: companyId,
+            number: number,
+            date: block.timestamp,
+            clientAddress: clientAddress,
+            totalAmount: totalAmount,
+            isPaid: useTokens, // If tokens used, mark as paid immediately
+            createdAt: block.timestamp,
+            updatedAt: block.timestamp
+        });
+        
+        // Store invoice items
+        for (uint256 i = 0; i < items.length; i++) {
+            invoiceItems[invoiceId].push(items[i]);
+        }
+        
+        companyInvoices[companyId].push(invoiceId);
+        clientInvoices[clientAddress].push(invoiceId);
+        allInvoiceIds.push(invoiceId);
+        
+        // Update product stock if products contract is set
+        if (address(productsContract) != address(0)) {
+            for (uint256 i = 0; i < items.length; i++) {
+                productsContract.updateProductStock(items[i].productId, items[i].quantity);
+            }
+        }
+        
+        // Register client purchase if clients contract is set
+        if (address(clientsContract) != address(0)) {
+            clientsContract.registerClientPurchase(companyId, clientAddress, totalAmount);
+            clientsContract.incrementInvoiceCount(companyId, clientAddress);
+        }
+        
+        emit InvoiceCreated(invoiceId, companyId, number, clientAddress, totalAmount);
+        
+        return invoiceId;
+    }
+
+    /**
+     * @dev Create a new invoice for client purchase (anyone can call this)
+     * @param companyId ID of the company
+     * @param number Invoice number
+     * @param clientAddress Address of the client (must be msg.sender)
+     * @param items Array of invoice items (products and quantities)
+     * @param useTokens Whether to deduct tokens from client's balance
+     * @return invoiceId Unique identifier for the created invoice
+     */
+    function createInvoiceForPurchase(
+        uint256 companyId,
+        uint256 number,
+        address clientAddress,
+        InvoiceItem[] memory items,
+        bool useTokens
+    ) external returns (uint256 invoiceId) {
+        require(companyContract.companyExists(companyId), "Invoice: Company does not exist");
+        require(companyContract.isCompanyActive(companyId), "Invoice: Company is not active");
+        require(clientAddress == msg.sender, "Invoice: Client address must match caller");
+        require(items.length > 0, "Invoice: No items provided");
+        
+        // Get company data
+        ICompany.CompanyData memory company = companyContract.getCompany(companyId);
+        
+        // Calculate total amount and validate stock
+        uint256 totalAmount = 0;
+        for (uint256 i = 0; i < items.length; i++) {
+            require(items[i].quantity > 0, "Invoice: Item quantity must be greater than zero");
+            
+            // Check if product exists and belongs to the company
+            if (address(productsContract) != address(0)) {
+                require(productsContract.productExists(items[i].productId), "Invoice: Product does not exist");
+                
+                // Get product data to verify it belongs to the company
+                IProducts.ProductData memory product = productsContract.getProduct(items[i].productId);
+                require(product.companyId == companyId, "Invoice: Product does not belong to company");
+                
                 require(
                     productsContract.hasStockAvailable(items[i].productId, items[i].quantity),
                     "Invoice: Insufficient stock"

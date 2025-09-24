@@ -15,6 +15,13 @@ cache
 backend/artifacts
 backend/cache
 backend/out
+backend/bin
+backend/node_modules
+backend/coverage
+backend/build
+backend/dist
+backend/logs
+backend/logs
 
 
 # SetupTestData

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useWallet } from '../hooks/useWallet';
 import { useAdmin } from '../hooks/useAdmin';
+import { useTheme } from '../hooks/useTheme';
 import { NETWORKS } from '../services/walletService';
 
 const Header: React.FC = () => {
@@ -17,6 +18,7 @@ const Header: React.FC = () => {
   } = useWallet();
 
   const { isAdmin } = useAdmin();
+  const { theme, getThemeClasses } = useTheme();
 
   const formatAddress = (addr: string) => {
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
@@ -31,18 +33,29 @@ const Header: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <div className="flex items-center">
+          <div className="flex items-center space-x-3">
             <h1 className="text-xl font-bold text-gray-900">
               🛒 ITC E-commerce
             </h1>
+            {isConnected && (
+              <div className={`px-2 py-1 rounded-full text-xs font-medium ${
+                theme === 'admin' 
+                  ? 'bg-admin-100 text-admin-800' 
+                  : theme === 'client'
+                  ? 'bg-client-100 text-client-800'
+                  : 'bg-primary-100 text-primary-800'
+              }`}>
+                {theme === 'admin' ? '🔧 Admin' : theme === 'client' ? '👤 Client' : '🌐 Guest'}
+              </div>
+            )}
           </div>
 
           {/* Navigation */}
           <nav className="hidden md:flex space-x-8">
-            <a href="/" className="text-gray-700 hover:text-primary-600 font-medium">
+            <a href="/" className={`text-gray-700 hover:${getThemeClasses('text-primary-600')} font-medium`}>
               Home
             </a>
-            <a href="/products" className="text-gray-700 hover:text-primary-600 font-medium">
+            <a href="/products" className={`text-gray-700 hover:${getThemeClasses('text-primary-600')} font-medium`}>
               Products
             </a>
             
@@ -51,19 +64,19 @@ const Header: React.FC = () => {
               <>
                 {/* Admin Navigation */}
                 {isAdmin ? (
-                  <a href="/admin/dashboard" className="text-blue-700 hover:text-blue-800 font-medium">
+                  <a href="/admin/dashboard" className={`text-admin-700 hover:text-admin-800 font-medium`}>
                     🔧 Admin Dashboard
                   </a>
                 ) : (
                   /* User Navigation */
                   <>
-                    <a href="/my-balance" className="text-gray-700 hover:text-primary-600 font-medium">
+                    <a href="/my-balance" className={`text-gray-700 hover:${getThemeClasses('text-primary-600')} font-medium`}>
                       My Balance
                     </a>
-                    <a href="/tokens" className="text-gray-700 hover:text-primary-600 font-medium">
+                    <a href="/tokens" className={`text-gray-700 hover:${getThemeClasses('text-primary-600')} font-medium`}>
                       Buy Tokens
                     </a>
-                    <a href="/purchases" className="text-gray-700 hover:text-primary-600 font-medium">
+                    <a href="/purchases" className={`text-gray-700 hover:${getThemeClasses('text-primary-600')} font-medium`}>
                       Purchase History
                     </a>
                   </>
@@ -113,7 +126,7 @@ const Header: React.FC = () => {
                 <button
                   onClick={disconnectWallet}
                   disabled={isLoading}
-                  className="btn-outline text-sm"
+                  className={`${getThemeClasses('border-primary-300 text-primary-700 hover:bg-primary-50')} border text-sm px-3 py-1 rounded-md transition duration-200`}
                 >
                   {isLoading ? 'Disconnecting...' : 'Disconnect'}
                 </button>
@@ -122,7 +135,7 @@ const Header: React.FC = () => {
               <button
                 onClick={connectWallet}
                 disabled={isLoading}
-                className="btn-primary"
+                className={`${getThemeClasses('bg-primary-600 hover:bg-primary-700')} text-white px-4 py-2 rounded-md font-medium transition duration-200`}
               >
                 {isLoading ? 'Connecting...' : 'Connect Wallet'}
               </button>

@@ -1,6 +1,7 @@
 import React from 'react';
 import type { ProductData } from '../services/productsService';
 import { productsService } from '../services/productsService';
+import { useTheme } from '../hooks/useTheme';
 
 interface ProductCardProps {
   product: ProductData;
@@ -21,6 +22,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
 }) => {
   const imageUrl = productsService.getIPFSUrl(product.image);
   const hasStock = parseInt(product.stock) > 0;
+  const { getThemeClasses } = useTheme();
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
@@ -90,7 +92,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
         </div>
 
         <div className="flex items-center justify-between mb-3">
-          <div className="text-xl font-bold text-primary-600">
+          <div className={`text-xl font-bold ${getThemeClasses('text-primary-600')}`}>
             {product.priceFormatted} ITC
           </div>
           <div className="text-sm text-gray-600">
@@ -104,14 +106,14 @@ const ProductCard: React.FC<ProductCardProps> = ({
             {!isConnected ? (
               <button
                 onClick={onConnectWallet}
-                className="flex-1 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium py-2 px-3 rounded-md transition duration-200"
+                className={`flex-1 ${getThemeClasses('bg-primary-600 hover:bg-primary-700')} text-white text-sm font-medium py-2 px-3 rounded-md transition duration-200`}
               >
                 Connect to Shop
               </button>
             ) : product.isActive && hasStock ? (
               <button
                 onClick={() => onAddToCart?.(product)}
-                className="flex-1 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium py-2 px-3 rounded-md transition duration-200"
+                className={`flex-1 ${getThemeClasses('bg-primary-600 hover:bg-primary-700')} text-white text-sm font-medium py-2 px-3 rounded-md transition duration-200`}
               >
                 Add to Cart
               </button>
@@ -126,7 +128,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
             
             <button
               onClick={() => onViewDetails?.(product)}
-              className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium py-2 px-3 rounded-md transition duration-200"
+              className={`${getThemeClasses('bg-primary-100 hover:bg-primary-200 text-primary-700')} text-sm font-medium py-2 px-3 rounded-md transition duration-200`}
             >
               Details
             </button>

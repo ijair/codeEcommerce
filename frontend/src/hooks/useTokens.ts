@@ -111,6 +111,34 @@ export const useTokens = () => {
     }
   };
 
+  const burnTokens = async (tokenAmount: string): Promise<TokenWithdrawResult> => {
+    if (!address) {
+      return { success: false, error: 'Wallet not connected' };
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const result = await tokenService.burnTokens(tokenAmount, address);
+      
+      if (result.success) {
+        // Reload balances after successful burn
+        await loadTokenData();
+      } else {
+        setError(result.error || 'Failed to burn tokens');
+      }
+      
+      return result;
+    } catch (err: any) {
+      const errorMessage = err.message || 'Failed to burn tokens';
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const withdrawTokens = async (tokenAmount: string): Promise<TokenWithdrawResult> => {
     if (!address) {
       return { success: false, error: 'Wallet not connected' };
@@ -190,6 +218,7 @@ export const useTokens = () => {
     
     // Actions
     buyTokens,
+    burnTokens,
     withdrawTokens,
     fullFillTokens,
     calculateBuyTokensCost,

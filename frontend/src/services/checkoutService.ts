@@ -90,37 +90,23 @@ class CheckoutService {
         });
       }
 
+      // Single approval for all purchases (optimize MetaMask confirmations)
+      const totalApprovalAmount = purchaseItems.reduce((sum, item) => sum + BigInt(item.totalPrice), 0n);
+      console.log(`Approving ${formatEther(totalApprovalAmount)} ITC tokens to invoice contract for all purchases`);
+      const invoiceAddress = await invoiceContract.getAddress();
+      const approveTx = await tokenContract.approve(invoiceAddress, totalApprovalAmount);
+      await approveTx.wait();
+      console.log('✅ Token approval completed for all purchases');
+
       // Process each company's purchases
       for (const [companyId, companyItems] of purchasesByCompany) {
         console.log(`Processing purchases for company ${companyId} with ${companyItems.length} items`);
 
-        // Get company details
-        const company = await companyContract.getCompany(companyId);
+        // Get company details (for validation)
+        await companyContract.getCompany(companyId);
         
-        // Calculate total for this company
-        const companyTotal = companyItems.reduce((sum, item) => sum + item.totalPrice, 0n);
-
-        // Transfer tokens to company owner
-        console.log(`Transferring ${formatEther(companyTotal)} ITC tokens to company owner ${company.owner}`);
-        const transferTx = await tokenContract.transfer(company.owner, companyTotal);
-        const transferReceipt = await transferTx.wait();
-        receipts.push(transferReceipt);
-
-        // Update product stock and register client for each item
-        for (const item of companyItems) {
-          console.log(`Updating stock for product ${item.productId}, reducing by ${item.quantity}`);
-          const stockTx = await productsContract.completePurchase(
-            item.productId, 
-            item.quantity, 
-            userAddress, 
-            item.totalPrice
-          );
-          const stockReceipt = await stockTx.wait();
-          receipts.push(stockReceipt);
-        }
-
-        // Create invoice in smart contract for this company
-        console.log(`Creating invoice for company ${companyId}`);
+        // Create invoice in smart contract for this company (this handles token transfer, stock update, and client registration)
+        console.log(`Creating invoice for company ${companyId} - this will handle all operations in one transaction`);
         const invoiceItems = companyItems.map(item => ({
           productId: item.productId,
           quantity: item.quantity,
@@ -128,7 +114,7 @@ class CheckoutService {
           totalPrice: item.totalPrice
         }));
 
-        const invoiceTx = await invoiceContract.createInvoiceWithProducts(
+        const invoiceTx = await invoiceContract.createInvoiceForPurchase(
           companyId,
           Date.now(), // Use timestamp as invoice number
           userAddress,

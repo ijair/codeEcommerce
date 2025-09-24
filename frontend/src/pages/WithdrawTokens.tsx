@@ -13,7 +13,7 @@ const WithdrawTokens: React.FC = () => {
     balances: userBalances,
     isLoading: isTokensLoading,
     error: tokensError,
-    withdrawTokens,
+    burnTokens,
     calculateWithdrawTokensNet,
   } = useTokens();
 
@@ -152,8 +152,8 @@ const WithdrawTokens: React.FC = () => {
         console.warn('Failed to record withdrawal:', recordResult.error);
       }
 
-      // Call the blockchain withdrawal function
-      const result = await withdrawTokens(tokenAmount);
+      // Call the blockchain burn function
+      const result = await burnTokens(tokenAmount);
       
       if (result.success && recordResult.recordId) {
         // Update withdrawal status to completed
@@ -194,10 +194,10 @@ const WithdrawTokens: React.FC = () => {
         }
       }
     } catch (error: any) {
-      console.error('Error during token withdrawal:', error);
+      console.error('Error during token burn:', error);
       setWithdrawStatus({ 
         success: false, 
-        message: 'An unexpected error occurred during withdrawal.', 
+        message: 'An unexpected error occurred during token burn.', 
         error: error.message 
       });
     } finally {
@@ -215,8 +215,8 @@ const WithdrawTokens: React.FC = () => {
   if (!isConnected) {
     return (
       <div className="container mx-auto p-8 text-center">
-        <h2 className="text-3xl font-bold text-gray-800 mb-4">Connect Your Wallet to Withdraw Tokens</h2>
-        <p className="text-lg text-gray-600 mb-6">Please connect your MetaMask wallet to access the token withdrawal functionality.</p>
+        <h2 className="text-3xl font-bold text-gray-800 mb-4">Connect Your Wallet to Burn Tokens</h2>
+        <p className="text-lg text-gray-600 mb-6">Please connect your MetaMask wallet to access the token burn functionality.</p>
         <button
           onClick={connectWallet}
           className="bg-primary-600 hover:bg-primary-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out"
@@ -229,7 +229,7 @@ const WithdrawTokens: React.FC = () => {
 
   return (
     <div className="container mx-auto p-8">
-      <h1 className="text-4xl font-extrabold text-gray-900 mb-8 text-center">Withdraw ITC Tokens</h1>
+      <h1 className="text-4xl font-extrabold text-gray-900 mb-8 text-center">Burn ITC Tokens</h1>
 
       {isLoading && <p className="text-center text-gray-600">Loading token data and balances...</p>}
       {tokensError && <p className="text-center text-red-500">Error: {tokensError}</p>}
@@ -278,7 +278,7 @@ const WithdrawTokens: React.FC = () => {
                 type="tokens"
                 required={tokenAmount}
                 available={userBalances.balanceFormatted}
-                action="withdraw"
+                action="burn"
                 showBuyTokensLink={true}
               />
             )}
@@ -499,7 +499,7 @@ const WithdrawTokens: React.FC = () => {
               {/* Net Amount Calculation */}
               {tokenAmount && (
                 <div className="bg-gray-50 p-4 rounded-md mb-4">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-2">Withdrawal Breakdown:</h3>
+                  <h3 className="text-lg font-semibold text-gray-800 mb-2">Token Burn Breakdown:</h3>
                   
                   {isCalculating ? (
                     <div className="animate-pulse space-y-2">
@@ -510,7 +510,7 @@ const WithdrawTokens: React.FC = () => {
                   ) : netInfo ? (
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
-                        <span>Tokens to Withdraw:</span>
+                        <span>Tokens to Burn:</span>
                         <span className="font-medium">{tokenAmount} ITC</span>
                       </div>
                       <div className="flex justify-between">
@@ -550,7 +550,7 @@ const WithdrawTokens: React.FC = () => {
                     disabled={isProcessing}
                   />
                   <label htmlFor="confirmWithdrawal" className="text-sm text-gray-700">
-                    <span className="font-medium text-red-800">I confirm that I want to withdraw {tokenAmount || '0'} ITC tokens.</span>
+                    <span className="font-medium text-red-800">I confirm that I want to burn {tokenAmount || '0'} ITC tokens.</span>
                     <div className="mt-2 space-y-1 text-xs text-gray-600">
                       <p>• I understand that this action cannot be undone</p>
                       <p>• I have verified the destination address/bank details are correct</p>
@@ -570,7 +570,7 @@ const WithdrawTokens: React.FC = () => {
                 }`}
                 disabled={isProcessing || insufficientTokens || !netInfo || parseFloat(tokenAmount) <= 0 || !confirmWithdrawal}
               >
-                {isProcessing ? 'Processing Withdrawal...' : 'Withdraw Tokens'}
+                {isProcessing ? 'Processing Token Burn...' : 'Burn Tokens'}
               </button>
 
               {withdrawStatus && (

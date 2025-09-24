@@ -221,7 +221,7 @@ const MyBalance: React.FC = () => {
             className={`text-center ${hasTokens ? 'btn-outline' : 'btn-disabled'}`}
             {...(!hasTokens && { onClick: (e) => e.preventDefault() })}
           >
-            💸 Withdraw Tokens
+            🔥 Burn Tokens
           </Link>
           <Link
             to="/products"
@@ -233,7 +233,7 @@ const MyBalance: React.FC = () => {
         
         {!hasTokens && (
           <div className="mt-4 text-center text-sm text-gray-600">
-            You need ITC tokens to make purchases or withdrawals. 
+            You need ITC tokens to make purchases or burn them. 
             <Link to="/tokens" className="text-primary-600 hover:text-primary-800 font-medium ml-1">
               Buy tokens now →
             </Link>

@@ -227,6 +227,77 @@ class TokenService {
   }
 
   /**
+   * Self-burn tokens (any user can burn their own tokens)
+   */
+  async burnTokens(tokenAmount: string, userAddress: string): Promise<TokenWithdrawResult> {
+    try {
+      const tokenContract = contractService.getContract('token');
+      
+      if (!tokenContract) {
+        throw new Error('Token contract not available');
+      }
+
+      // Check if user has enough tokens
+      const userTokenBalance = await tokenContract.balanceOf(userAddress);
+      const tokenAmountWei = parseEther(tokenAmount);
+      
+      if (userTokenBalance < tokenAmountWei) {
+        return {
+          success: false,
+          error: `Insufficient token balance. Required: ${tokenAmount} ITC, Available: ${formatEther(userTokenBalance)} ITC`,
+        };
+      }
+
+      // Execute self-burn (any user can burn their own tokens)
+      const tx = await tokenContract.selfBurn(tokenAmountWei, {
+        gasLimit: 300000,
+      });
+
+      console.log('Token self-burn transaction sent:', tx.hash);
+      
+      // Wait for transaction confirmation
+      const receipt = await tx.wait();
+      console.log('Token self-burn confirmed:', receipt.transactionHash);
+
+      return {
+        success: true,
+        message: 'Tokens burned successfully!',
+        transactionHash: receipt.transactionHash,
+      };
+    } catch (error: any) {
+      console.error('Error burning tokens:', error);
+      
+      // Handle specific error cases
+      if (error.message.includes('insufficient funds')) {
+        return {
+          success: false,
+          error: 'Insufficient ETH for gas fees',
+        };
+      }
+      
+      if (error.message.includes('user rejected')) {
+        return {
+          success: false,
+          error: 'Transaction rejected by user',
+        };
+      }
+      
+      if (error.message.includes('Insufficient balance')) {
+        return {
+          success: false,
+          error: 'Insufficient token balance to burn',
+        };
+      }
+
+      return {
+        success: false,
+        message: 'Transaction failed',
+        error: error.message || 'Failed to burn tokens',
+      };
+    }
+  }
+
+  /**
    * Withdraw tokens (convert back to ETH)
    */
   async withdrawTokens(tokenAmount: string, userAddress: string): Promise<TokenWithdrawResult> {

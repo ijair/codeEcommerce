@@ -3,6 +3,7 @@ import { useWallet } from '../hooks/useWallet';
 import { useProducts } from '../hooks/useProducts';
 import { useCart } from '../hooks/useCart';
 import { useToast } from '../hooks/useToast';
+import { useTheme } from '../hooks/useTheme';
 import ProductCard from '../components/ProductCard';
 import ProductFiltersComponent from '../components/ProductFilters';
 import ShoppingCart from '../components/ShoppingCart';
@@ -34,6 +35,8 @@ const Products: React.FC = () => {
     showError,
     removeToast,
   } = useToast();
+
+  const { getThemeClasses } = useTheme();
 
   const [selectedProduct, setSelectedProduct] = useState<ProductData | null>(null);
   const [showProductModal, setShowProductModal] = useState(false);
@@ -106,7 +109,7 @@ const Products: React.FC = () => {
             ) : (
               <button
                 onClick={connectWallet}
-                className="relative bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition duration-200"
+                className={`relative ${getThemeClasses('bg-primary-600 hover:bg-primary-700')} text-white px-4 py-2 rounded-lg transition duration-200`}
               >
                 <div className="flex items-center space-x-2">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -140,7 +143,7 @@ const Products: React.FC = () => {
       </div>
 
       {/* Payment Info Banner */}
-      <div className="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-lg mb-6">
+      <div className={`${getThemeClasses('bg-primary-50 border-primary-200 text-primary-800')} border px-4 py-3 rounded-lg mb-6`}>
         <div className="flex items-center">
           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -151,7 +154,7 @@ const Products: React.FC = () => {
               {isConnected ? (
                 <>
                   All products are priced in ITC tokens. Make sure you have enough tokens in your wallet to purchase. 
-                  <a href="/tokens" className="font-bold underline ml-1">Buy tokens here</a>.
+                  <a href="/tokens" className={`font-bold underline ml-1 ${getThemeClasses('text-primary-700 hover:text-primary-800')}`}>Buy tokens here</a>.
                 </>
               ) : (
                 <>

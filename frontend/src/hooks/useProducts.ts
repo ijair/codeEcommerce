@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { ethers } from 'ethers';
 import { productsService, type ProductData, type ProductFilters } from '../services/productsService';
 import { useWallet } from './useWallet';
 import { useContracts } from './useContracts';
@@ -113,24 +114,35 @@ export const useProducts = () => {
     setError(null);
     
     try {
-      let results = products;
+      let results = [...products]; // Start with a copy of all products
 
       // Apply company filter
       if (filters.companyId) {
-        results = await productsService.getProductsByCompany(filters.companyId);
+        results = results.filter(product => product.companyId === filters.companyId);
       }
 
       // Apply price range filter
-      if (filters.minPrice && filters.maxPrice) {
-        results = await productsService.getProductsByPriceRange(filters.minPrice, filters.maxPrice);
+      if (filters.minPrice || filters.maxPrice) {
+        const minPriceWei = filters.minPrice ? ethers.parseEther(filters.minPrice).toString() : '0';
+        const maxPriceWei = filters.maxPrice ? ethers.parseEther(filters.maxPrice).toString() : ethers.parseEther('1000000').toString(); // Very high number
+        
+        results = results.filter(product => {
+          const productPrice = BigInt(product.price);
+          const minPrice = BigInt(minPriceWei);
+          const maxPrice = BigInt(maxPriceWei);
+          return productPrice >= minPrice && productPrice <= maxPrice;
+        });
       }
 
       // Apply search query
       if (filters.searchQuery) {
-        results = await productsService.searchProducts(filters.searchQuery);
+        const searchTerm = filters.searchQuery.toLowerCase();
+        results = results.filter(product => 
+          product.name.toLowerCase().includes(searchTerm)
+        );
       }
 
-      // Apply active only filter (client-side)
+      // Apply active only filter
       if (filters.activeOnly) {
         results = results.filter(product => product.isActive);
       }

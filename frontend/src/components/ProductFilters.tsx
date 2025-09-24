@@ -48,8 +48,8 @@ const ProductFiltersComponent: React.FC<ProductFiltersProps> = ({
     const filters: ProductFilters = {
       searchQuery: searchQuery.trim() || undefined,
       companyId: companyId || undefined,
-      minPrice: min,
-      maxPrice: max,
+      minPrice: min || undefined,
+      maxPrice: max || undefined,
       activeOnly,
     };
 

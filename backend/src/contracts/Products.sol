@@ -4,6 +4,7 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "../interfaces/IProducts.sol";
 import "../interfaces/ICompany.sol";
+import "../interfaces/IClients.sol";
 
 /**
  * @title Products
@@ -14,6 +15,9 @@ import "../interfaces/ICompany.sol";
 contract Products is Ownable, IProducts {
     // Reference to the Company contract
     ICompany public companyContract;
+    
+    // Reference to the Clients contract
+    IClients public clientsContract;
     
     // Mapping of authorized contracts that can update stock
     mapping(address => bool) public authorizedContracts;
@@ -40,6 +44,15 @@ contract Products is Ownable, IProducts {
     constructor(address initialOwner, address _companyContract) Ownable(initialOwner) {
         require(_companyContract != address(0), "Products: Invalid company contract address");
         companyContract = ICompany(_companyContract);
+    }
+
+    /**
+     * @dev Set the Clients contract address (only owner)
+     * @param _clientsContract Address of the Clients contract
+     */
+    function setClientsContract(address _clientsContract) external onlyOwner {
+        require(_clientsContract != address(0), "Products: Invalid clients contract address");
+        clientsContract = IClients(_clientsContract);
     }
 
     /**
@@ -495,6 +508,48 @@ contract Products is Ownable, IProducts {
         // Reduce stock
         products[productId].stock -= quantity;
         products[productId].updatedAt = block.timestamp;
+        
+        emit ProductStockUpdated(productId, products[productId].stock);
+    }
+
+    /**
+     * @dev Complete purchase process - reduces stock and registers client automatically
+     * @param productId Unique identifier for the product
+     * @param quantity Quantity to purchase
+     * @param clientAddress Address of the client making the purchase
+     * @param purchaseAmount Total amount of the purchase in wei
+     * @dev This function handles the complete purchase process including client registration
+     */
+    function completePurchase(
+        uint256 productId, 
+        uint256 quantity, 
+        address clientAddress, 
+        uint256 purchaseAmount
+    ) external {
+        require(productExists(productId), "Products: Product does not exist");
+        require(products[productId].isActive, "Products: Product is not active");
+        require(quantity > 0, "Products: Quantity must be greater than zero");
+        require(products[productId].stock >= quantity, "Products: Insufficient stock");
+        require(clientAddress != address(0), "Products: Invalid client address");
+        require(purchaseAmount > 0, "Products: Purchase amount must be greater than zero");
+        
+        // Reduce stock
+        products[productId].stock -= quantity;
+        products[productId].updatedAt = block.timestamp;
+        
+        // Register client purchase if Clients contract is set
+        if (address(clientsContract) != address(0)) {
+            try clientsContract.registerClientPurchase(
+                products[productId].companyId,
+                clientAddress,
+                purchaseAmount
+            ) {
+                // Client registration successful
+            } catch {
+                // Continue with purchase even if client registration fails
+                // This ensures the purchase is not blocked by client registration issues
+            }
+        }
         
         emit ProductStockUpdated(productId, products[productId].stock);
     }

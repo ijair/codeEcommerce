@@ -236,6 +236,20 @@ interface IProducts {
     function purchaseProduct(uint256 productId, uint256 quantity) external;
 
     /**
+     * @dev Complete purchase process - reduces stock and registers client automatically
+     * @param productId Unique identifier for the product
+     * @param quantity Quantity to purchase
+     * @param clientAddress Address of the client making the purchase
+     * @param purchaseAmount Total amount of the purchase in wei
+     */
+    function completePurchase(
+        uint256 productId, 
+        uint256 quantity, 
+        address clientAddress, 
+        uint256 purchaseAmount
+    ) external;
+
+    /**
      * @dev Check if product has sufficient stock
      * @param productId Unique identifier for the product
      * @param quantity Required quantity

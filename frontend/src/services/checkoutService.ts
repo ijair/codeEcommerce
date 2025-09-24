@@ -75,13 +75,8 @@ class CheckoutService {
         );
       }
 
-      // Process each purchase (transfer tokens and update stock)
+      // Process each purchase (transfer tokens, update stock, and register client)
       const receipts = [];
-      const purchasesByCompany = new Map<string, {
-        companyId: bigint;
-        totalAmount: bigint;
-        products: Array<{productId: number; quantity: number; price: bigint}>;
-      }>();
 
       for (const item of purchaseItems) {
         console.log(`Processing purchase for product ${item.productId}, quantity ${item.quantity}`);
@@ -96,48 +91,20 @@ class CheckoutService {
         const transferReceipt = await transferTx.wait();
         receipts.push(transferReceipt);
 
-        // Update product stock using the new purchaseProduct function
+        // Update product stock and register client automatically
         console.log(`Updating stock for product ${item.productId}, reducing by ${item.quantity}`);
-        const stockTx = await productsContract.purchaseProduct(item.productId, item.quantity);
+        const stockTx = await productsContract.completePurchase(
+          item.productId, 
+          item.quantity, 
+          userAddress, 
+          item.totalPrice
+        );
         const stockReceipt = await stockTx.wait();
         receipts.push(stockReceipt);
-
-        // Store company info for later client registration (optimize to single call)
-        if (!purchasesByCompany.has(product.companyId.toString())) {
-          purchasesByCompany.set(product.companyId.toString(), {
-            companyId: product.companyId,
-            totalAmount: 0n,
-            products: []
-          });
-        }
-        
-        const companyPurchase = purchasesByCompany.get(product.companyId.toString())!;
-        companyPurchase.totalAmount += item.totalPrice;
-        companyPurchase.products.push({
-          productId: item.productId,
-          quantity: item.quantity,
-          price: item.totalPrice
-        });
       }
 
-      // Register client purchases (optimized batch processing)
-      if (!options.skipClientRegistration && options.registerAsClient !== false) {
-        const purchasesToRegister = Array.from(purchasesByCompany.values()).map(p => ({
-          companyId: p.companyId,
-          totalAmount: p.totalAmount
-        }));
-
-        const registrationResult = await clientService.batchRegisterPurchases(userAddress, purchasesToRegister);
-        
-        if (registrationResult.success) {
-          console.log(`✅ Client registration completed. Total gas used: ${registrationResult.gasUsed}`);
-        } else {
-          console.warn(`⚠️ Client registration partially failed. Errors: ${registrationResult.errors.length}`);
-          // Continue with purchase even if client registration fails
-        }
-      } else {
-        console.log('💰 Skipping client registration to save gas costs (~180k gas per company)');
-      }
+      // Client registration is now handled automatically by the Products contract
+      console.log('✅ Client registration completed automatically during purchase');
 
       // Generate purchase ID (no formal invoice creation as client is not company owner)
       const purchaseId = Date.now().toString();

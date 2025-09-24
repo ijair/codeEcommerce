@@ -1,7 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useWallet } from '../../hooks/useWallet';
+import { useAdmin } from '../../hooks/useAdmin';
 import { useTokens } from '../../hooks/useTokens';
+import AccessDenied from '../../components/AccessDenied';
 
 /**
  * Admin Dashboard - Main control panel for system administrators
@@ -9,6 +11,7 @@ import { useTokens } from '../../hooks/useTokens';
  */
 const AdminDashboard: React.FC = () => {
   const { isConnected, address } = useWallet();
+  const { isAdmin, isLoading: isAdminLoading } = useAdmin();
   const { balances, tokenInfo } = useTokens();
 
   if (!isConnected) {
@@ -21,6 +24,29 @@ const AdminDashboard: React.FC = () => {
           </p>
         </div>
       </div>
+    );
+  }
+
+  if (isAdminLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-pulse flex space-x-4">
+          <div className="rounded-full bg-primary-200 h-10 w-10"></div>
+          <div className="flex-1 space-y-2 py-1">
+            <div className="h-4 bg-primary-200 rounded w-3/4"></div>
+            <div className="h-4 bg-primary-200 rounded w-1/2"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <AccessDenied
+        title="Admin Access Required"
+        message="This dashboard is restricted to platform administrators only."
+      />
     );
   }
 
@@ -58,10 +84,10 @@ const AdminDashboard: React.FC = () => {
       iconColor: 'text-yellow-600'
     },
     {
-      title: 'User Management',
-      description: 'Manage users, permissions and access control',
+      title: 'Client Management',
+      description: 'Manage clients, activate and deactivate client accounts',
       icon: '👥',
-      link: '/admin/users',
+      link: '/admin/clients',
       color: 'bg-indigo-50 border-indigo-200 hover:bg-indigo-100',
       iconColor: 'text-indigo-600'
     },
@@ -85,6 +111,37 @@ const AdminDashboard: React.FC = () => {
         <p className="text-lg text-gray-600">
           Welcome to the administrative control panel. Manage all aspects of the e-commerce platform.
         </p>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="mb-8 bg-gray-50 rounded-lg p-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Link
+            to="/admin/companies/create"
+            className="btn-primary text-center"
+          >
+            + Create Company
+          </Link>
+          <Link
+            to="/admin/products/create"
+            className="btn-outline text-center"
+          >
+            + Add Product
+          </Link>
+          <Link
+            to="/tokens"
+            className="btn-outline text-center"
+          >
+            💰 Manage Tokens
+          </Link>
+          <Link
+            to="/admin/statistics"
+            className="btn-outline text-center"
+          >
+            📈 View Reports
+          </Link>
+        </div>
       </div>
 
       {/* Admin Info */}
@@ -147,36 +204,6 @@ const AdminDashboard: React.FC = () => {
         ))}
       </div>
 
-      {/* Quick Actions */}
-      <div className="mt-8 bg-gray-50 rounded-lg p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Link
-            to="/admin/companies/create"
-            className="btn-primary text-center"
-          >
-            + Create Company
-          </Link>
-          <Link
-            to="/admin/products/create"
-            className="btn-outline text-center"
-          >
-            + Add Product
-          </Link>
-          <Link
-            to="/tokens"
-            className="btn-outline text-center"
-          >
-            💰 Manage Tokens
-          </Link>
-          <Link
-            to="/admin/statistics"
-            className="btn-outline text-center"
-          >
-            📈 View Reports
-          </Link>
-        </div>
-      </div>
 
       {/* System Status */}
       <div className="mt-8 bg-white rounded-lg shadow-sm border border-gray-200 p-6">

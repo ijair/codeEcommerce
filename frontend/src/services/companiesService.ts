@@ -141,6 +141,42 @@ class CompaniesService {
   }
 
   /**
+   * Create a new company (admin creates and owns the company)
+   */
+  async createCompanyForOwner(name: string, ownerAddress: string): Promise<CompanyResult> {
+    try {
+      const companyContract = contractService.getContract('company');
+      if (!companyContract) {
+        throw new Error('Company contract not available');
+      }
+
+      // Use the existing createCompany function - the admin will be the owner
+      const tx = await companyContract.createCompany(name, {
+        gasLimit: 300000,
+      });
+
+      const receipt = await tx.wait();
+      
+      // Get the company ID from the latest count
+      const companyId = await this.getLastCompanyId();
+
+      return {
+        success: true,
+        message: 'Company created successfully! The admin is the owner.',
+        companyId: companyId,
+        transactionHash: receipt.transactionHash,
+      };
+    } catch (error: any) {
+      console.error('Error creating company:', error);
+      return {
+        success: false,
+        message: 'Failed to create company',
+        error: error.message || 'Unknown error',
+      };
+    }
+  }
+
+  /**
    * Update company (owner only)
    */
   async updateCompany(updateData: CompanyUpdateData): Promise<CompanyResult> {

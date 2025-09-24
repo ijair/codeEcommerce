@@ -48,7 +48,7 @@ const Footer: React.FC = () => {
                 </a>
               </li>
               <li>
-                <a href="/dashboard" className="text-gray-600 hover:text-primary-600">
+                <a href="/admin/dashboard" className="text-gray-600 hover:text-primary-600">
                   Dashboard
                 </a>
               </li>

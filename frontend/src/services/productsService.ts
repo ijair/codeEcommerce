@@ -6,7 +6,7 @@ export interface ProductData {
   companyId: string;
   name: string;
   price: string; // in wei
-  priceFormatted: string; // in ETH
+  priceFormatted: string; // in ITC tokens
   image: string; // IPFS hash
   stock: string;
   createdAt: string;
@@ -25,7 +25,7 @@ export interface ProductFilters {
 export interface ProductCreateData {
   companyId: string;
   name: string;
-  price: string; // in ETH (will be converted to wei)
+  price: string; // in ITC tokens (will be converted to wei)
   image: string; // IPFS hash
   stock: string;
 }
@@ -33,7 +33,7 @@ export interface ProductCreateData {
 export interface ProductUpdateData {
   productId: string;
   name?: string;
-  price?: string; // in ETH
+  price?: string; // in ITC tokens
   image?: string;
 }
 
@@ -224,6 +224,7 @@ class ProductsService {
         throw new Error('Products contract not available');
       }
 
+      // Convert ITC token price to wei (18 decimals)
       const priceWei = ethers.parseEther(productData.price);
       const companyIdNum = parseInt(productData.companyId);
       const stockNum = parseInt(productData.stock);
@@ -231,7 +232,7 @@ class ProductsService {
       console.log('Creating product with params:', {
         companyId: companyIdNum,
         name: productData.name,
-        price: productData.price,
+        priceITC: productData.price,
         priceWei: priceWei.toString(),
         image: productData.image,
         stock: stockNum,

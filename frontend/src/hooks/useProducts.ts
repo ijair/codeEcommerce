@@ -148,6 +148,39 @@ export const useProducts = () => {
     setFilteredProducts(products);
   }, [products]);
 
+  const createProduct = useCallback(async (
+    companyId: string,
+    name: string,
+    price: number,
+    image: string,
+    stock: number
+  ) => {
+    setIsLoading(true);
+    try {
+      const result = await productsService.createProduct({
+        companyId,
+        name,
+        price: price.toString(),
+        image,
+        stock: stock.toString(),
+      });
+      if (result.success) {
+        // Reload products after successful creation
+        await loadAllProducts();
+      }
+      return result;
+    } catch (err: any) {
+      console.error('Error creating product:', err);
+      return {
+        success: false,
+        message: 'Failed to create product',
+        error: err.message || 'Unknown error',
+      };
+    } finally {
+      setIsLoading(false);
+    }
+  }, [loadAllProducts]);
+
   const refreshProducts = useCallback(() => {
     loadAllProducts();
   }, [loadAllProducts]);
@@ -165,6 +198,7 @@ export const useProducts = () => {
     filterByCompany,
     applyFilters,
     clearFilters,
+    createProduct,
     refreshProducts,
   };
 };

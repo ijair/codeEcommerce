@@ -95,6 +95,27 @@ export const useCompanies = () => {
     }
   }, [loadAllCompanies]);
 
+  const createCompanyForOwner = useCallback(async (name: string, ownerAddress: string) => {
+    setIsLoading(true);
+    try {
+      const result = await companiesService.createCompanyForOwner(name, ownerAddress);
+      if (result.success) {
+        // Reload companies after successful creation
+        await loadAllCompanies();
+      }
+      return result;
+    } catch (err: any) {
+      console.error('Error creating company for owner:', err);
+      return {
+        success: false,
+        message: 'Failed to create company',
+        error: err.message || 'Unknown error',
+      };
+    } finally {
+      setIsLoading(false);
+    }
+  }, [loadAllCompanies]);
+
   const updateCompany = useCallback(async (companyId: string, name: string) => {
     setIsLoading(true);
     try {
@@ -180,6 +201,7 @@ export const useCompanies = () => {
     loadActiveCompanies,
     loadCompaniesByOwner,
     createCompany,
+    createCompanyForOwner,
     updateCompany,
     deactivateCompany,
     reactivateCompany,

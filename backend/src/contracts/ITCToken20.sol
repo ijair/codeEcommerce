@@ -37,9 +37,8 @@ contract ITCToken20 is ERC20, Ownable, ReentrancyGuard, IITCToken20 {
         ERC20("ITC Token", "ITC") 
         Ownable(initialOwner) 
     {
-        // Mint initial supply to the owner (10% of max supply)
-        uint256 initialSupply = (MAX_SUPPLY * 10) / 100;
-        _mint(initialOwner, initialSupply);
+        // Mint all tokens to the owner for distribution
+        _mint(initialOwner, MAX_SUPPLY);
     }
 
     /**
@@ -47,11 +46,11 @@ contract ITCToken20 is ERC20, Ownable, ReentrancyGuard, IITCToken20 {
      * @notice Users can buy tokens after Stripe payment confirmation
      */
     function buyTokens() external payable override nonReentrant {
-        require(msg.value > 0, "ITCToken20: Debes enviar ETH");
+        require(msg.value > 0, "ITCToken20: Amount must be greater than zero");
         
         // Calculate tokens to buy based on ETH sent and token price
         uint256 tokensToBuy = (msg.value * 1e18) / tokenPrice;
-        require(balanceOf(owner()) >= tokensToBuy, "ITCToken20: No hay suficientes tokens disponibles");
+        require(balanceOf(owner()) >= tokensToBuy, "ITCToken20: Insufficient tokens available");
         
         // Transfer tokens from owner to buyer
         _transfer(owner(), msg.sender, tokensToBuy);
@@ -134,7 +133,7 @@ contract ITCToken20 is ERC20, Ownable, ReentrancyGuard, IITCToken20 {
      */
     function fullFillTokens() external payable onlyOwner {
         require(msg.sender == owner(), "ITCToken20: Access Denied, you must be the contract owner");
-        require(msg.value > 0, "ITCToken20: Debes enviar ETH");
+        require(msg.value > 0, "ITCToken20: Amount must be greater than zero");
         
         // Calculate tokens to mint based on ETH sent and token price
         uint256 tokensToMint = (msg.value * 1e18) / tokenPrice;

@@ -7,6 +7,8 @@ interface ProductCardProps {
   onAddToCart?: (product: ProductData) => void;
   onViewDetails?: (product: ProductData) => void;
   showActions?: boolean;
+  isConnected?: boolean;
+  onConnectWallet?: () => void;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({
@@ -14,6 +16,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
   onAddToCart,
   onViewDetails,
   showActions = true,
+  isConnected = true,
+  onConnectWallet,
 }) => {
   const imageUrl = productsService.getIPFSUrl(product.image);
   const hasStock = parseInt(product.stock) > 0;
@@ -97,7 +101,14 @@ const ProductCard: React.FC<ProductCardProps> = ({
         {/* Product Actions */}
         {showActions && (
           <div className="flex space-x-2">
-            {product.isActive && hasStock ? (
+            {!isConnected ? (
+              <button
+                onClick={onConnectWallet}
+                className="flex-1 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium py-2 px-3 rounded-md transition duration-200"
+              >
+                Connect to Shop
+              </button>
+            ) : product.isActive && hasStock ? (
               <button
                 onClick={() => onAddToCart?.(product)}
                 className="flex-1 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium py-2 px-3 rounded-md transition duration-200"

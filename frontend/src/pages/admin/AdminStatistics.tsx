@@ -10,7 +10,7 @@ import { adminStatsService } from '../../services/adminStatsService';
  */
 const AdminStatistics: React.FC = () => {
   const { isConnected } = useWallet();
-  const { tokenInfo, priceInfo } = useTokens();
+  const { tokenInfo, priceInfo, balances } = useTokens();
 
   // Mock data - in production, fetch from contracts/backend
   const [stats, setStats] = useState({
@@ -25,6 +25,17 @@ const AdminStatistics: React.FC = () => {
   });
 
   const [loading, setLoading] = useState(true);
+  const [recentActivity, setRecentActivity] = useState({
+    todaySales: 0,
+    weekSales: 0,
+    monthSales: 0,
+    todayTokenPurchases: 0,
+    weekTokenPurchases: 0,
+    monthTokenPurchases: 0,
+    todayNewUsers: 0,
+    weekNewUsers: 0,
+    monthNewUsers: 0
+  });
 
   useEffect(() => {
     const loadStatistics = async () => {
@@ -42,6 +53,10 @@ const AdminStatistics: React.FC = () => {
           tokensSold: 0, // This would need to be calculated from token events
           tokensWithdrawn: 0 // This would need to be calculated from token events
         });
+
+        // Load recent activity data from Invoice contract
+        const activityData = await adminStatsService.getRecentActivityData();
+        setRecentActivity(activityData);
       } catch (error) {
         console.error('Error loading statistics:', error);
         // Set to zero values if there's an error
@@ -193,23 +208,38 @@ const AdminStatistics: React.FC = () => {
             ))}
           </div>
 
+
           {/* Token Statistics */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Token Analytics</h2>
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Tokens Sold</span>
-                  <span className="font-semibold">{stats.tokensSold.toLocaleString()} ITC</span>
+                  <span className="text-gray-600">Admin Token Balance</span>
+                  <span className="font-semibold text-blue-600">
+                    {balances ? `${parseFloat(balances.balanceFormatted).toLocaleString()} ITC` : 'Loading...'}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Tokens Withdrawn</span>
-                  <span className="font-semibold">{stats.tokensWithdrawn.toLocaleString()} ITC</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Net Tokens in Circulation</span>
+                  <span className="text-gray-600">Tokens Available for Sale</span>
                   <span className="font-semibold text-green-600">
-                    {(stats.tokensSold - stats.tokensWithdrawn).toLocaleString()} ITC
+                    {balances ? `${parseFloat(balances.balanceFormatted).toLocaleString()} ITC` : 'Loading...'}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Tokens Sold to Users</span>
+                  <span className="font-semibold">
+                    {tokenInfo && balances ? 
+                      `${(parseFloat(tokenInfo.totalSupplyFormatted) - parseFloat(balances.balanceFormatted)).toLocaleString()} ITC` 
+                      : '0 ITC'}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Distribution Rate</span>
+                  <span className="font-semibold">
+                    {tokenInfo && balances ? 
+                      `${(((parseFloat(tokenInfo.totalSupplyFormatted) - parseFloat(balances.balanceFormatted)) / parseFloat(tokenInfo.totalSupplyFormatted)) * 100).toFixed(2)}%` 
+                      : '0.00%'}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
@@ -227,26 +257,26 @@ const AdminStatistics: React.FC = () => {
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Total Supply</span>
                   <span className="font-semibold">
-                    {tokenInfo ? (parseFloat(tokenInfo.totalSupply) / 1e18).toLocaleString() : 'Loading...'} ITC
+                    {tokenInfo ? parseFloat(tokenInfo.totalSupplyFormatted).toLocaleString() : 'Loading...'} ITC
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Max Supply</span>
                   <span className="font-semibold">
-                    {tokenInfo ? (parseFloat(tokenInfo.maxSupply) / 1e18).toLocaleString() : 'Loading...'} ITC
+                    {tokenInfo ? parseFloat(tokenInfo.maxSupplyFormatted).toLocaleString() : 'Loading...'} ITC
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Remaining Supply</span>
-                  <span className="font-semibold text-blue-600">
-                    {tokenInfo ? (parseFloat(tokenInfo.remainingSupply) / 1e18).toLocaleString() : 'Loading...'} ITC
+                  <span className="text-gray-600">Supply Status</span>
+                  <span className="font-semibold text-green-600">
+                    {tokenInfo ? 'Fully Minted to Admin' : 'Loading...'}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-600">Supply Utilization</span>
+                  <span className="text-gray-600">Supply Distribution</span>
                   <span className="font-semibold">
                     {tokenInfo ? 
-                      `${((parseFloat(tokenInfo.totalSupply) / parseFloat(tokenInfo.maxSupply)) * 100).toFixed(1)}%`
+                      `${((parseFloat(tokenInfo.totalSupplyFormatted) / parseFloat(tokenInfo.maxSupplyFormatted)) * 100).toFixed(1)}%`
                       : 'Loading...'}
                   </span>
                 </div>
@@ -256,7 +286,18 @@ const AdminStatistics: React.FC = () => {
 
           {/* Recent Activity */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity Summary</h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold text-gray-900">Recent Activity Summary</h2>
+              <button
+                onClick={async () => {
+                  const activityData = await adminStatsService.getRecentActivityData();
+                  setRecentActivity(activityData);
+                }}
+                className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+              >
+                Refresh
+              </button>
+            </div>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
@@ -281,13 +322,13 @@ const AdminStatistics: React.FC = () => {
                       New Sales
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {loading ? '...' : '0'}
+                      {loading ? '...' : recentActivity.todaySales}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {loading ? '...' : '0'}
+                      {loading ? '...' : recentActivity.weekSales}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {loading ? '...' : '0'}
+                      {loading ? '...' : recentActivity.monthSales}
                     </td>
                   </tr>
                   <tr>
@@ -295,13 +336,13 @@ const AdminStatistics: React.FC = () => {
                       Token Purchases
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {loading ? '...' : '0 ITC'}
+                      {loading ? '...' : `${recentActivity.todayTokenPurchases.toFixed(6)} ITC`}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {loading ? '...' : '0 ITC'}
+                      {loading ? '...' : `${recentActivity.weekTokenPurchases.toFixed(6)} ITC`}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {loading ? '...' : '0 ITC'}
+                      {loading ? '...' : `${recentActivity.monthTokenPurchases.toFixed(6)} ITC`}
                     </td>
                   </tr>
                   <tr>
@@ -309,13 +350,13 @@ const AdminStatistics: React.FC = () => {
                       New Users
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {loading ? '...' : '0'}
+                      {loading ? '...' : recentActivity.todayNewUsers}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {loading ? '...' : '0'}
+                      {loading ? '...' : recentActivity.weekNewUsers}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {loading ? '...' : '0'}
+                      {loading ? '...' : recentActivity.monthNewUsers}
                     </td>
                   </tr>
                 </tbody>

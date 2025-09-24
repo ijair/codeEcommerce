@@ -1,4 +1,4 @@
-import { ethers } from 'ethers';
+import { Contract, BrowserProvider, JsonRpcSigner } from 'ethers';
 import { CONTRACT_ADDRESSES } from '../config/contracts';
 
 // Contract ABIs (simplified for demo - in production, import from compiled artifacts)
@@ -72,6 +72,7 @@ export const CONTRACT_ABIS = {
     'function updateProductStock(uint256 productId, uint256 quantity)',
     'function addProductStock(uint256 productId, uint256 quantity)',
     'function purchaseProduct(uint256 productId, uint256 quantity)',
+    'function completePurchase(uint256 productId, uint256 quantity, address clientAddress, uint256 purchaseAmount)',
     'function getProductStock(uint256 productId) view returns (uint256)',
     'function hasStockAvailable(uint256 productId, uint256 quantity) view returns (bool)',
     'function authorizeContract(address contractAddress)',
@@ -120,14 +121,14 @@ export const CONTRACT_ABIS = {
 };
 
 class ContractService {
-  private signer: ethers.JsonRpcSigner | null = null;
-  private contracts: Record<string, ethers.Contract> = {};
+  private signer: JsonRpcSigner | null = null;
+  private contracts: Record<string, Contract> = {};
   private currentNetwork: string = 'local';
 
   /**
    * Initialize contract service with provider and signer
    */
-  async initialize(_provider: ethers.BrowserProvider, signer: ethers.JsonRpcSigner, networkKey: string = 'local') {
+  async initialize(_provider: BrowserProvider, signer: JsonRpcSigner, networkKey: string = 'local') {
     this.signer = signer;
     this.currentNetwork = networkKey;
     
@@ -145,11 +146,11 @@ class ContractService {
     
     try {
       this.contracts = {
-        token: new ethers.Contract(addresses.ITCToken20, CONTRACT_ABIS.ITCToken20, this.signer),
-        company: new ethers.Contract(addresses.Company, CONTRACT_ABIS.Company, this.signer),
-        products: new ethers.Contract(addresses.Products, CONTRACT_ABIS.Products, this.signer),
-        invoice: new ethers.Contract(addresses.Invoice, CONTRACT_ABIS.Invoice, this.signer),
-        clients: new ethers.Contract(addresses.Clients, CONTRACT_ABIS.Clients, this.signer),
+        token: new Contract(addresses.ITCToken20, CONTRACT_ABIS.ITCToken20, this.signer),
+        company: new Contract(addresses.Company, CONTRACT_ABIS.Company, this.signer),
+        products: new Contract(addresses.Products, CONTRACT_ABIS.Products, this.signer),
+        invoice: new Contract(addresses.Invoice, CONTRACT_ABIS.Invoice, this.signer),
+        clients: new Contract(addresses.Clients, CONTRACT_ABIS.Clients, this.signer),
       };
     } catch (error) {
       console.error('Error initializing contracts:', error);
@@ -160,7 +161,7 @@ class ContractService {
   /**
    * Get contract instance
    */
-  getContract(contractName: string): ethers.Contract | null {
+  getContract(contractName: string): Contract | null {
     return this.contracts[contractName] || null;
   }
 
@@ -188,7 +189,7 @@ class ContractService {
   /**
    * Switch network and reinitialize contracts
    */
-  async switchNetwork(networkKey: string, newProvider: ethers.BrowserProvider, signer: ethers.JsonRpcSigner) {
+  async switchNetwork(networkKey: string, newProvider: BrowserProvider, signer: JsonRpcSigner) {
     await this.initialize(newProvider, signer, networkKey);
   }
 }

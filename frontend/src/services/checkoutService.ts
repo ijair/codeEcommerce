@@ -1,8 +1,7 @@
-import { ethers } from 'ethers';
+import { formatEther, parseEther } from 'ethers';
 import type { CheckoutResult } from '../types/contracts';
 import type { CartItem } from './cartService';
 import { contractService } from './contractService';
-import { clientService } from './clientService';
 
 /**
  * Service for handling checkout and purchase transactions
@@ -13,11 +12,7 @@ class CheckoutService {
    */
   async processCheckout(
     cartItems: CartItem[],
-    userAddress: string,
-    options: {
-      registerAsClient?: boolean;
-      skipClientRegistration?: boolean;
-    } = {}
+    userAddress: string
   ): Promise<CheckoutResult> {
     try {
       if (!cartItems || cartItems.length === 0) {
@@ -34,8 +29,9 @@ class CheckoutService {
       const tokenContract = contractService.getContract('token');
       const productsContract = contractService.getContract('products');
       const companyContract = contractService.getContract('company');
+      const invoiceContract = contractService.getContract('invoice');
       
-      if (!tokenContract || !productsContract || !companyContract) {
+      if (!tokenContract || !productsContract || !companyContract || !invoiceContract) {
         throw new Error('Required contracts not initialized');
       }
 
@@ -46,7 +42,7 @@ class CheckoutService {
       for (const item of cartItems) {
         const productId = parseInt(item.product.id);
         const quantity = item.quantity;
-        const unitPrice = ethers.parseEther(item.product.priceFormatted);
+        const unitPrice = parseEther(item.product.priceFormatted);
         const totalPrice = unitPrice * BigInt(quantity);
 
         // Verify stock availability
@@ -65,59 +61,110 @@ class CheckoutService {
         });
       }
 
-      console.log('Total amount:', ethers.formatEther(totalAmount), 'ITC tokens');
+      console.log('Total amount:', formatEther(totalAmount), 'ITC tokens');
 
       // Check user token balance
       const userBalance = await tokenContract.balanceOf(userAddress);
       if (userBalance < totalAmount) {
         throw new Error(
-          `Insufficient token balance. Required: ${ethers.formatEther(totalAmount)} ITC, Available: ${ethers.formatEther(userBalance)} ITC`
+          `Insufficient token balance. Required: ${formatEther(totalAmount)} ITC, Available: ${formatEther(userBalance)} ITC`
         );
       }
 
       // Process each purchase (transfer tokens, update stock, and register client)
       const receipts = [];
+      let invoiceId: string | null = null;
 
+      // Group purchases by company for invoice creation
+      const purchasesByCompany = new Map<number, any[]>();
       for (const item of purchaseItems) {
-        console.log(`Processing purchase for product ${item.productId}, quantity ${item.quantity}`);
-
-        // Get product and company details
         const product = await productsContract.getProduct(item.productId);
-        const company = await companyContract.getCompany(product.companyId);
+        const companyId = product.companyId;
+        
+        if (!purchasesByCompany.has(companyId)) {
+          purchasesByCompany.set(companyId, []);
+        }
+        purchasesByCompany.get(companyId)!.push({
+          ...item,
+          companyId
+        });
+      }
+
+      // Process each company's purchases
+      for (const [companyId, companyItems] of purchasesByCompany) {
+        console.log(`Processing purchases for company ${companyId} with ${companyItems.length} items`);
+
+        // Get company details
+        const company = await companyContract.getCompany(companyId);
+        
+        // Calculate total for this company
+        const companyTotal = companyItems.reduce((sum, item) => sum + item.totalPrice, 0n);
 
         // Transfer tokens to company owner
-        console.log(`Transferring ${ethers.formatEther(item.totalPrice)} ITC tokens to company owner ${company.owner}`);
-        const transferTx = await tokenContract.transfer(company.owner, item.totalPrice);
+        console.log(`Transferring ${formatEther(companyTotal)} ITC tokens to company owner ${company.owner}`);
+        const transferTx = await tokenContract.transfer(company.owner, companyTotal);
         const transferReceipt = await transferTx.wait();
         receipts.push(transferReceipt);
 
-        // Update product stock and register client automatically
-        console.log(`Updating stock for product ${item.productId}, reducing by ${item.quantity}`);
-        const stockTx = await productsContract.completePurchase(
-          item.productId, 
-          item.quantity, 
-          userAddress, 
-          item.totalPrice
+        // Update product stock and register client for each item
+        for (const item of companyItems) {
+          console.log(`Updating stock for product ${item.productId}, reducing by ${item.quantity}`);
+          const stockTx = await productsContract.completePurchase(
+            item.productId, 
+            item.quantity, 
+            userAddress, 
+            item.totalPrice
+          );
+          const stockReceipt = await stockTx.wait();
+          receipts.push(stockReceipt);
+        }
+
+        // Create invoice in smart contract for this company
+        console.log(`Creating invoice for company ${companyId}`);
+        const invoiceItems = companyItems.map(item => ({
+          productId: item.productId,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          totalPrice: item.totalPrice
+        }));
+
+        const invoiceTx = await invoiceContract.createInvoiceWithProducts(
+          companyId,
+          Date.now(), // Use timestamp as invoice number
+          userAddress,
+          invoiceItems,
+          true // useTokens = true
         );
-        const stockReceipt = await stockTx.wait();
-        receipts.push(stockReceipt);
+        const invoiceReceipt = await invoiceTx.wait();
+        receipts.push(invoiceReceipt);
+        
+        // Get the invoice ID from the transaction receipt
+        if (invoiceReceipt.logs && invoiceReceipt.logs.length > 0) {
+          // Parse the InvoiceCreated event to get the invoice ID
+          const invoiceCreatedEvent = invoiceReceipt.logs.find((log: any) => 
+            log.topics[0] === '0x...' // InvoiceCreated event signature
+          );
+          if (invoiceCreatedEvent) {
+            invoiceId = invoiceCreatedEvent.topics[1]; // Invoice ID is in topics[1]
+          }
+        }
       }
 
       // Client registration is now handled automatically by the Products contract
       console.log('✅ Client registration completed automatically during purchase');
 
-      // Generate purchase ID (no formal invoice creation as client is not company owner)
-      const purchaseId = Date.now().toString();
+      // Use invoice ID from smart contract or fallback to timestamp
+      const purchaseId = invoiceId || Date.now().toString();
       console.log('Purchase completed with ID:', purchaseId);
       
-      // Record purchase in localStorage for user history
+      // Record purchase in localStorage for user history (keep for backward compatibility)
       this.recordPurchaseInHistory(userAddress, purchaseId, receipts[0]?.hash || 'multiple_transactions', purchaseItems, totalAmount);
 
       return {
         success: true,
         invoiceId: purchaseId,
         transactionHash: receipts[0]?.hash || 'multiple_transactions',
-        totalAmount: ethers.formatEther(totalAmount),
+        totalAmount: formatEther(totalAmount),
         message: 'Purchase completed successfully!'
       };
 
@@ -156,13 +203,13 @@ class CheckoutService {
         date: Date.now(),
         transactionHash: transactionHash,
         totalAmount: totalAmount.toString(),
-        totalAmountFormatted: ethers.formatEther(totalAmount),
+        totalAmountFormatted: formatEther(totalAmount),
         items: purchaseItems.map(item => ({
           productId: item.productId.toString(),
           productName: item.product.name,
           quantity: item.quantity,
-          unitPrice: ethers.formatEther(item.unitPrice),
-          totalPrice: ethers.formatEther(item.totalPrice),
+          unitPrice: formatEther(item.unitPrice),
+          totalPrice: formatEther(item.totalPrice),
           companyId: item.product.companyId
         })),
         status: 'completed'

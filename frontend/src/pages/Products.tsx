@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { useWallet } from '../hooks/useWallet';
 import { useProducts } from '../hooks/useProducts';
 import { useCart } from '../hooks/useCart';
+import { useToast } from '../hooks/useToast';
 import ProductCard from '../components/ProductCard';
 import ProductFiltersComponent from '../components/ProductFilters';
 import ShoppingCart from '../components/ShoppingCart';
+import ToastContainer from '../components/ToastContainer';
 import { productsService } from '../services/productsService';
 import type { ProductData, ProductFilters } from '../services/productsService';
 
@@ -26,6 +28,13 @@ const Products: React.FC = () => {
     totalItems,
   } = useCart();
 
+  const {
+    toasts,
+    showSuccess,
+    showError,
+    removeToast,
+  } = useToast();
+
   const [selectedProduct, setSelectedProduct] = useState<ProductData | null>(null);
   const [showProductModal, setShowProductModal] = useState(false);
   const [showCart, setShowCart] = useState(false);
@@ -41,10 +50,9 @@ const Products: React.FC = () => {
   const handleAddToCart = (product: ProductData) => {
     const result = addToCart(product, 1);
     if (result.success) {
-      // Optionally show a toast notification instead of alert
-      console.log(result.message);
+      showSuccess(`${product.name} added to cart!`);
     } else {
-      alert(result.error || 'Failed to add item to cart');
+      showError(result.error || 'Failed to add item to cart');
     }
   };
 
@@ -54,24 +62,11 @@ const Products: React.FC = () => {
   };
 
   const handleCheckout = () => {
-    // This will be handled by the ShoppingCart component itself
+    // Refresh products to update stock after purchase
+    refreshProducts();
     console.log('Checkout completed successfully');
   };
 
-  if (!isConnected) {
-    return (
-      <div className="container mx-auto p-8 text-center">
-        <h2 className="text-3xl font-bold text-gray-800 mb-4">Connect Your Wallet to Browse Products</h2>
-        <p className="text-lg text-gray-600 mb-6">Please connect your MetaMask wallet to access the product marketplace.</p>
-        <button
-          onClick={connectWallet}
-          className="bg-primary-600 hover:bg-primary-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out"
-        >
-          Connect Wallet
-        </button>
-      </div>
-    );
-  }
 
   return (
     <div className="container mx-auto p-8">
@@ -87,26 +82,40 @@ const Products: React.FC = () => {
           
           <div className="flex items-center space-x-4">
             {/* Cart Button */}
-            <button
-              onClick={() => setShowCart(true)}
-              className={`relative bg-primary-100 hover:bg-primary-200 text-primary-800 px-4 py-2 rounded-lg transition duration-200 ${
-                hasItems ? 'ring-2 ring-primary-300' : ''
-              }`}
-            >
-              <div className="flex items-center space-x-2">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                </svg>
-                <span className="font-medium">
-                  Cart {hasItems && `(${totalItems})`}
-                </span>
-              </div>
-              {hasItems && (
-                <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                  {totalItems}
+            {isConnected ? (
+              <button
+                onClick={() => setShowCart(true)}
+                className={`relative bg-primary-100 hover:bg-primary-200 text-primary-800 px-4 py-2 rounded-lg transition duration-200 ${
+                  hasItems ? 'ring-2 ring-primary-300' : ''
+                }`}
+              >
+                <div className="flex items-center space-x-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                  </svg>
+                  <span className="font-medium">
+                    Cart {hasItems && `(${totalItems})`}
+                  </span>
                 </div>
-              )}
-            </button>
+                {hasItems && (
+                  <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    {totalItems}
+                  </div>
+                )}
+              </button>
+            ) : (
+              <button
+                onClick={connectWallet}
+                className="relative bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg transition duration-200"
+              >
+                <div className="flex items-center space-x-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                  <span className="font-medium">Connect to Shop</span>
+                </div>
+              </button>
+            )}
             
             {/* Refresh Button */}
             <button
@@ -126,11 +135,11 @@ const Products: React.FC = () => {
         <div className="flex space-x-6 text-sm text-gray-600">
           <span>Total Products: {totalCount}</span>
           <span>Showing: {products.length}</span>
-          {hasItems && <span>Cart: {totalItems} items</span>}
+          {isConnected && hasItems && <span>Cart: {totalItems} items</span>}
         </div>
       </div>
 
-      {/* Token Info Banner */}
+      {/* Payment Info Banner */}
       <div className="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-lg mb-6">
         <div className="flex items-center">
           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -138,8 +147,17 @@ const Products: React.FC = () => {
           </svg>
           <div>
             <p className="font-medium">Payment Information</p>
-            <p className="text-sm">All products are priced in ITC tokens. Make sure you have enough tokens in your wallet to purchase. 
-              <a href="/tokens" className="font-bold underline ml-1">Buy tokens here</a>.
+            <p className="text-sm">
+              {isConnected ? (
+                <>
+                  All products are priced in ITC tokens. Make sure you have enough tokens in your wallet to purchase. 
+                  <a href="/tokens" className="font-bold underline ml-1">Buy tokens here</a>.
+                </>
+              ) : (
+                <>
+                  All products are priced in ITC tokens. Connect your wallet to start shopping and purchasing products.
+                </>
+              )}
             </p>
           </div>
         </div>
@@ -213,6 +231,8 @@ const Products: React.FC = () => {
                   onAddToCart={handleAddToCart}
                   onViewDetails={handleViewDetails}
                   showActions={true}
+                  isConnected={isConnected}
+                  onConnectWallet={connectWallet}
                 />
               ))}
             </div>
@@ -333,6 +353,9 @@ const Products: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Toast Notifications */}
+      <ToastContainer toasts={toasts} onRemoveToast={removeToast} />
     </div>
   );
 };

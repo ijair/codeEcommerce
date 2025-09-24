@@ -1,4 +1,4 @@
-import { ethers } from 'ethers';
+import { formatEther, parseEther } from 'ethers';
 import { contractService } from './contractService';
 import type { 
   TokenFees, 
@@ -22,7 +22,7 @@ class TokenService {
 
       // Get token balance
       const tokenBalance = await tokenContract.balanceOf(userAddress);
-      const tokenBalanceFormatted = ethers.formatEther(tokenBalance);
+      const tokenBalanceFormatted = formatEther(tokenBalance);
 
       // Get ETH balance from provider
       const ethProvider = signer.provider;
@@ -31,7 +31,7 @@ class TokenService {
       }
       
       const ethBalance = await ethProvider.getBalance(userAddress);
-      const ethBalanceFormatted = ethers.formatEther(ethBalance);
+      const ethBalanceFormatted = formatEther(ethBalance);
 
       return {
         balance: tokenBalance.toString(),
@@ -68,7 +68,7 @@ class TokenService {
 
       return {
         tokenPrice: tokenPrice.toString(),
-        tokenPriceFormatted: ethers.formatEther(tokenPrice),
+        tokenPriceFormatted: formatEther(tokenPrice),
         stripeFeeConfig: {
           fixedFee: stripeFeeConfig[0].toString(),
           percentageFee: stripeFeeConfig[1].toString(),
@@ -91,7 +91,7 @@ class TokenService {
         throw new Error('Token contract not available');
       }
 
-      const tokenAmountWei = ethers.parseEther(tokenAmount);
+      const tokenAmountWei = parseEther(tokenAmount);
       const result = await tokenContract.calculateBuyTokensCost(tokenAmountWei);
 
       return {
@@ -115,7 +115,7 @@ class TokenService {
         throw new Error('Token contract not available');
       }
 
-      const tokenAmountWei = ethers.parseEther(tokenAmount);
+      const tokenAmountWei = parseEther(tokenAmount);
       const result = await tokenContract.calculateWithdrawTokensNet(tokenAmountWei);
 
       return {
@@ -142,7 +142,7 @@ class TokenService {
 
       // Get token price to calculate ETH cost
       const tokenPrice = await tokenContract.getTokenPrice();
-      const tokenAmountWei = ethers.parseEther(tokenAmount);
+      const tokenAmountWei = parseEther(tokenAmount);
       
       // Calculate ETH cost: (tokenAmount * tokenPrice) / 1e18
       const ethCost = (tokenAmountWei * tokenPrice) / BigInt('1000000000000000000');
@@ -159,7 +159,7 @@ class TokenService {
       if (userBalance < ethCost) {
         return {
           success: false,
-          error: `Insufficient ETH balance. Required: ${ethers.formatEther(ethCost)} ETH, Available: ${ethers.formatEther(userBalance)} ETH`,
+          error: `Insufficient ETH balance. Required: ${formatEther(ethCost)} ETH, Available: ${formatEther(userBalance)} ETH`,
         };
       }
 
@@ -170,7 +170,7 @@ class TokenService {
       if (ownerTokenBalance < tokenAmountWei) {
         return {
           success: false,
-          error: `Insufficient tokens available. Requested: ${tokenAmount} ITC, Available: ${ethers.formatEther(ownerTokenBalance)} ITC`,
+          error: `Insufficient tokens available. Requested: ${tokenAmount} ITC, Available: ${formatEther(ownerTokenBalance)} ITC`,
         };
       }
 
@@ -239,12 +239,12 @@ class TokenService {
 
       // Check if user has enough tokens
       const userTokenBalance = await tokenContract.balanceOf(userAddress);
-      const tokenAmountWei = ethers.parseEther(tokenAmount);
+      const tokenAmountWei = parseEther(tokenAmount);
       
       if (userTokenBalance < tokenAmountWei) {
         return {
           success: false,
-          error: `Insufficient token balance. Required: ${tokenAmount} ITC, Available: ${ethers.formatEther(userTokenBalance)} ITC`,
+          error: `Insufficient token balance. Required: ${tokenAmount} ITC, Available: ${formatEther(userTokenBalance)} ITC`,
         };
       }
 
@@ -309,7 +309,7 @@ class TokenService {
         throw new Error('Token contract not available');
       }
 
-      const ethAmountWei = ethers.parseEther(ethAmount);
+      const ethAmountWei = parseEther(ethAmount);
 
       // Check if user is the owner
       const signer = tokenContract.runner;
@@ -317,7 +317,7 @@ class TokenService {
         throw new Error('Signer not available');
       }
       
-      const userAddress = await signer.getAddress();
+      const userAddress = await (signer as any).getAddress();
       const ownerAddress = await tokenContract.owner();
       
       if (userAddress.toLowerCase() !== ownerAddress.toLowerCase()) {
@@ -338,7 +338,7 @@ class TokenService {
       if (userBalance < ethAmountWei) {
         return {
           success: false,
-          error: `Insufficient ETH balance. Required: ${ethAmount} ETH, Available: ${ethers.formatEther(userBalance)} ETH`,
+          error: `Insufficient ETH balance. Required: ${ethAmount} ETH, Available: ${formatEther(userBalance)} ETH`,
         };
       }
 
@@ -400,6 +400,9 @@ class TokenService {
     totalSupply: string;
     maxSupply: string;
     remainingSupply: string;
+    totalSupplyFormatted: string;
+    maxSupplyFormatted: string;
+    remainingSupplyFormatted: string;
   } | null> {
     try {
       const tokenContract = contractService.getContract('token');
@@ -423,6 +426,9 @@ class TokenService {
         totalSupply: totalSupply.toString(),
         maxSupply: maxSupply.toString(),
         remainingSupply: remainingSupply.toString(),
+        totalSupplyFormatted: formatEther(totalSupply),
+        maxSupplyFormatted: formatEther(maxSupply),
+        remainingSupplyFormatted: formatEther(remainingSupply),
       };
     } catch (error: any) {
       console.error('Error getting token info:', error);
@@ -445,7 +451,7 @@ class TokenService {
         return false;
       }
 
-      const userAddress = await signer.getAddress();
+      const userAddress = await (signer as any).getAddress();
       const ownerAddress = await tokenContract.owner();
       
       return userAddress.toLowerCase() === ownerAddress.toLowerCase();

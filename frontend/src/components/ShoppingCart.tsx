@@ -5,6 +5,7 @@ import { useCheckout } from '../hooks/useCheckout';
 import { useTokens } from '../hooks/useTokens';
 import { productsService } from '../services/productsService';
 import InsufficientFundsMessage from './InsufficientFundsMessage';
+import Invoice from './Invoice';
 
 interface ShoppingCartProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ interface ShoppingCartProps {
 const ShoppingCart: React.FC<ShoppingCartProps> = ({
   isOpen,
   onClose,
+  onCheckout,
 }) => {
   const { isConnected, address } = useWallet();
   const { balances } = useTokens();
@@ -33,7 +35,8 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({
   const [isValidating] = useState(false);
   const [checkoutSuccess, setCheckoutSuccess] = useState<string | null>(null);
   const [showInsufficientFunds, setShowInsufficientFunds] = useState(false);
-  const [registerAsClient, setRegisterAsClient] = useState(false);
+  const [showInvoice, setShowInvoice] = useState(false);
+  const [invoiceData, setInvoiceData] = useState<any>(null);
 
   // Calculate unique companies in cart for gas estimation
   const uniqueCompanies = useMemo(() => {
@@ -95,22 +98,37 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({
       setCheckoutSuccess(null);
       
       console.log('Starting checkout process...');
-      const result = await processCheckout(cart.items, address, {
-        skipClientRegistration: !registerAsClient // Skip if not explicitly requested
-      });
+      const result = await processCheckout(cart.items, address);
       
       if (result.success) {
-        setCheckoutSuccess(`Purchase completed! Transaction ID: ${result.invoiceId}`);
+        // Create invoice data from the result
+        const invoiceData = {
+          id: result.invoiceId,
+          date: Date.now(),
+          transactionHash: result.transactionHash,
+          totalAmount: result.totalAmount,
+          totalAmountFormatted: result.totalAmount,
+          items: cart.items.map(item => ({
+            productId: item.product.id,
+            productName: item.product.name,
+            quantity: item.quantity,
+            unitPrice: item.product.priceFormatted,
+            totalPrice: (parseFloat(item.product.priceFormatted) * item.quantity).toFixed(6),
+            companyId: item.product.companyId
+          })),
+          status: 'Completed'
+        };
+        
+        setInvoiceData(invoiceData);
+        setShowInvoice(true);
         clearCart(); // Clear cart after successful purchase
         
-        // Don't call onCheckout() to avoid external alerts
-        console.log('Purchase completed successfully!');
+        // Call onCheckout to refresh products
+        if (onCheckout) {
+          onCheckout();
+        }
         
-        // Auto-close after 5 seconds
-        setTimeout(() => {
-          setCheckoutSuccess(null);
-          onClose();
-        }, 5000);
+        console.log('Purchase completed successfully!');
       } else {
         console.error('Checkout failed:', result.error);
       }
@@ -314,44 +332,36 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({
                 </div>
               )}
 
-              {/* Client Registration Option */}
+              {/* Gas Cost Information */}
               {isConnected && uniqueCompanies > 0 && (
-                <div className={`border rounded-lg p-3 ${registerAsClient ? 'bg-green-50 border-green-200' : 'bg-blue-50 border-blue-200'}`}>
-                  <label className="flex items-start space-x-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={registerAsClient}
-                      onChange={(e) => setRegisterAsClient(e.target.checked)}
-                      className="mt-1 h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-                    />
-                    <div className="text-sm flex-1">
-                      <div className={`font-medium ${registerAsClient ? 'text-green-900' : 'text-blue-900'}`}>
-                        Register as Customer
+                <div className="border rounded-lg p-3 bg-blue-50 border-blue-200">
+                  <div className="text-sm">
+                    <div className="font-medium text-blue-900 mb-2">
+                      Automatic Client Registration
+                    </div>
+                    <div className="text-blue-700 mb-3">
+                      You will be automatically registered as a customer with {estimatedGasSavings.companiesCount} company{estimatedGasSavings.companiesCount > 1 ? 'ies' : ''} for future benefits and purchase tracking.
+                    </div>
+                    
+                    {/* Gas Cost Information */}
+                    <div className="p-2 bg-white bg-opacity-50 rounded text-xs">
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium">Gas Impact:</span>
+                        <span className="text-orange-600">
+                          +{estimatedGasSavings.totalGas.toLocaleString()} gas
+                        </span>
                       </div>
-                      <div className={`${registerAsClient ? 'text-green-700' : 'text-blue-700'}`}>
-                        Register with {estimatedGasSavings.companiesCount} company{estimatedGasSavings.companiesCount > 1 ? 'ies' : ''} for future benefits and purchase tracking.
+                      <div className="flex justify-between items-center">
+                        <span>Est. Cost:</span>
+                        <span className="text-orange-600">
+                          ~${estimatedGasSavings.estimatedCostUSD}
+                        </span>
                       </div>
-                      
-                      {/* Gas Cost Information */}
-                      <div className="mt-2 p-2 bg-white bg-opacity-50 rounded text-xs">
-                        <div className="flex justify-between items-center">
-                          <span className="font-medium">Gas Impact:</span>
-                          <span className={registerAsClient ? 'text-orange-600' : 'text-green-600'}>
-                            {registerAsClient ? `+${estimatedGasSavings.totalGas.toLocaleString()} gas` : `Saves ${estimatedGasSavings.totalGas.toLocaleString()} gas`}
-                          </span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span>Est. Cost:</span>
-                          <span className={registerAsClient ? 'text-orange-600' : 'text-green-600'}>
-                            {registerAsClient ? `~$${estimatedGasSavings.estimatedCostUSD}` : `Saves ~$${estimatedGasSavings.estimatedCostUSD}`}
-                          </span>
-                        </div>
-                        <div className="text-gray-600 mt-1">
-                          {estimatedGasSavings.companiesCount} companies × {estimatedGasSavings.gasPerCompany.toLocaleString()} gas each
-                        </div>
+                      <div className="text-gray-600 mt-1">
+                        {estimatedGasSavings.companiesCount} companies × {estimatedGasSavings.gasPerCompany.toLocaleString()} gas each
                       </div>
                     </div>
-                  </label>
+                  </div>
                 </div>
               )}
 
@@ -401,6 +411,13 @@ const ShoppingCart: React.FC<ShoppingCartProps> = ({
           )}
         </div>
       </div>
+
+      {/* Invoice Modal */}
+      <Invoice
+        isOpen={showInvoice}
+        onClose={() => setShowInvoice(false)}
+        invoiceData={invoiceData}
+      />
     </div>
   );
 };

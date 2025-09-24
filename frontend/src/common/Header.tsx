@@ -46,20 +46,28 @@ const Header: React.FC = () => {
               Products
             </a>
             
-            {/* Admin Navigation */}
-            {isAdmin ? (
-              <a href="/admin/dashboard" className="text-blue-700 hover:text-blue-800 font-medium">
-                🔧 Admin Dashboard
-              </a>
-            ) : (
-              /* User Navigation */
+            {/* Wallet-dependent Navigation - Only show when connected */}
+            {isConnected && (
               <>
-                <a href="/my-balance" className="text-gray-700 hover:text-primary-600 font-medium">
-                  My Balance
-                </a>
-                <a href="/tokens" className="text-gray-700 hover:text-primary-600 font-medium">
-                  Buy Tokens
-                </a>
+                {/* Admin Navigation */}
+                {isAdmin ? (
+                  <a href="/admin/dashboard" className="text-blue-700 hover:text-blue-800 font-medium">
+                    🔧 Admin Dashboard
+                  </a>
+                ) : (
+                  /* User Navigation */
+                  <>
+                    <a href="/my-balance" className="text-gray-700 hover:text-primary-600 font-medium">
+                      My Balance
+                    </a>
+                    <a href="/tokens" className="text-gray-700 hover:text-primary-600 font-medium">
+                      Buy Tokens
+                    </a>
+                    <a href="/purchases" className="text-gray-700 hover:text-primary-600 font-medium">
+                      Purchase History
+                    </a>
+                  </>
+                )}
               </>
             )}
           </nav>

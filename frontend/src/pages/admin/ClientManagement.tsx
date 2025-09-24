@@ -72,10 +72,10 @@ const ClientManagement: React.FC = () => {
       
       if (result.success) {
         // Show success message (you could add a toast notification here)
-        console.log(result.message);
+        console.log('message' in result ? result.message || 'Operation completed successfully' : 'Operation completed successfully');
       } else {
         // Show error message
-        console.error(result.error);
+        console.error(result.error || 'Operation failed');
       }
     } catch (error) {
       console.error('Error toggling client:', error);

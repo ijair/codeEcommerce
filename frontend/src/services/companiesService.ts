@@ -143,7 +143,7 @@ class CompaniesService {
   /**
    * Create a new company (admin creates and owns the company)
    */
-  async createCompanyForOwner(name: string, ownerAddress: string): Promise<CompanyResult> {
+  async createCompanyForOwner(name: string, _ownerAddress: string): Promise<CompanyResult> {
     try {
       const companyContract = contractService.getContract('company');
       if (!companyContract) {

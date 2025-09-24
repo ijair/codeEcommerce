@@ -29,7 +29,7 @@ export interface AdminStatsWithChanges {
 
 class AdminStatsService {
   /**
-   * Get comprehensive admin statistics from blockchain
+   * Get comprehensive admin statistics from blockchain and localStorage
    */
   async getAdminStats(): Promise<AdminStats> {
     try {
@@ -78,6 +78,187 @@ class AdminStatsService {
         smartContracts: 5
       };
     }
+  }
+
+  /**
+   * Get recent activity data from Invoice contract
+   */
+  async getRecentActivityData(): Promise<{
+    todaySales: number;
+    weekSales: number;
+    monthSales: number;
+    todayTokenPurchases: number;
+    weekTokenPurchases: number;
+    monthTokenPurchases: number;
+    todayNewUsers: number;
+    weekNewUsers: number;
+    monthNewUsers: number;
+  }> {
+    try {
+      const invoiceContract = contractService.getContract('invoice');
+      if (!invoiceContract) {
+        console.warn('Invoice contract not available, falling back to localStorage');
+        return this.getRecentActivityDataFromLocalStorage();
+      }
+
+      const invoices = await invoiceContract.getAllInvoices();
+      console.log('AdminStats: All invoices for recent activity:', invoices);
+      
+      if (!Array.isArray(invoices)) {
+        console.warn('AdminStats: Invoices is not an array, falling back to localStorage');
+        return this.getRecentActivityDataFromLocalStorage();
+      }
+
+      const now = Date.now();
+      const oneDay = 24 * 60 * 60 * 1000;
+      const oneWeek = 7 * oneDay;
+      const oneMonth = 30 * oneDay;
+
+      let todaySales = 0;
+      let weekSales = 0;
+      let monthSales = 0;
+      let todayTokenPurchases = 0;
+      let weekTokenPurchases = 0;
+      let monthTokenPurchases = 0;
+      const todayUsers = new Set<string>();
+      const weekUsers = new Set<string>();
+      const monthUsers = new Set<string>();
+
+      // Process invoices from smart contract
+      for (const invoice of invoices) {
+        if (!invoice || !invoice.isPaid) continue;
+
+        const invoiceDate = parseInt(invoice.createdAt) * 1000; // Convert from seconds to milliseconds
+        const timeDiff = now - invoiceDate;
+        const invoiceAmount = parseFloat(ethers.formatEther(invoice.totalAmount));
+
+        // Count sales
+        if (timeDiff <= oneDay) {
+          todaySales++;
+          todayUsers.add(invoice.clientAddress);
+        }
+        if (timeDiff <= oneWeek) {
+          weekSales++;
+          weekUsers.add(invoice.clientAddress);
+        }
+        if (timeDiff <= oneMonth) {
+          monthSales++;
+          monthUsers.add(invoice.clientAddress);
+        }
+
+        // Count token purchases
+        if (timeDiff <= oneDay) {
+          todayTokenPurchases += invoiceAmount;
+        }
+        if (timeDiff <= oneWeek) {
+          weekTokenPurchases += invoiceAmount;
+        }
+        if (timeDiff <= oneMonth) {
+          monthTokenPurchases += invoiceAmount;
+        }
+      }
+
+      return {
+        todaySales,
+        weekSales,
+        monthSales,
+        todayTokenPurchases,
+        weekTokenPurchases,
+        monthTokenPurchases,
+        todayNewUsers: todayUsers.size,
+        weekNewUsers: weekUsers.size,
+        monthNewUsers: monthUsers.size
+      };
+    } catch (error) {
+      console.error('Error getting recent activity from contract, falling back to localStorage:', error);
+      return this.getRecentActivityDataFromLocalStorage();
+    }
+  }
+
+  /**
+   * Fallback method to get recent activity data from localStorage
+   */
+  private getRecentActivityDataFromLocalStorage(): {
+    todaySales: number;
+    weekSales: number;
+    monthSales: number;
+    todayTokenPurchases: number;
+    weekTokenPurchases: number;
+    monthTokenPurchases: number;
+    todayNewUsers: number;
+    weekNewUsers: number;
+    monthNewUsers: number;
+  } {
+    const now = Date.now();
+    const oneDay = 24 * 60 * 60 * 1000;
+    const oneWeek = 7 * oneDay;
+    const oneMonth = 30 * oneDay;
+
+    let todaySales = 0;
+    let weekSales = 0;
+    let monthSales = 0;
+    let todayTokenPurchases = 0;
+    let weekTokenPurchases = 0;
+    let monthTokenPurchases = 0;
+    const todayUsers = new Set<string>();
+    const weekUsers = new Set<string>();
+    const monthUsers = new Set<string>();
+
+    // Get all purchase history from localStorage
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('purchase_history_')) {
+        try {
+          const userPurchases = JSON.parse(localStorage.getItem(key) || '[]');
+          const userAddress = key.replace('purchase_history_', '');
+          
+          userPurchases.forEach((purchase: any) => {
+            const purchaseDate = purchase.date;
+            const timeDiff = now - purchaseDate;
+            const purchaseAmount = parseFloat(purchase.totalAmountFormatted || '0');
+
+            // Count sales
+            if (timeDiff <= oneDay) {
+              todaySales++;
+              todayUsers.add(userAddress);
+            }
+            if (timeDiff <= oneWeek) {
+              weekSales++;
+              weekUsers.add(userAddress);
+            }
+            if (timeDiff <= oneMonth) {
+              monthSales++;
+              monthUsers.add(userAddress);
+            }
+
+            // Count token purchases (assuming all purchases are token purchases)
+            if (timeDiff <= oneDay) {
+              todayTokenPurchases += purchaseAmount;
+            }
+            if (timeDiff <= oneWeek) {
+              weekTokenPurchases += purchaseAmount;
+            }
+            if (timeDiff <= oneMonth) {
+              monthTokenPurchases += purchaseAmount;
+            }
+          });
+        } catch (error) {
+          console.error('Error parsing purchase history for key:', key);
+        }
+      }
+    }
+
+    return {
+      todaySales,
+      weekSales,
+      monthSales,
+      todayTokenPurchases,
+      weekTokenPurchases,
+      monthTokenPurchases,
+      todayNewUsers: todayUsers.size,
+      weekNewUsers: weekUsers.size,
+      monthNewUsers: monthUsers.size
+    };
   }
 
   /**

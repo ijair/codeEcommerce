@@ -1,4 +1,4 @@
-import { ethers } from 'ethers';
+import { formatEther, parseEther } from 'ethers';
 import { contractService } from './contractService';
 
 export interface ProductData {
@@ -132,8 +132,8 @@ class ProductsService {
         throw new Error('Products contract not available');
       }
 
-      const minPriceWei = ethers.parseEther(minPrice);
-      const maxPriceWei = ethers.parseEther(maxPrice);
+      const minPriceWei = parseEther(minPrice);
+      const maxPriceWei = parseEther(maxPrice);
       
       const products = await productsContract.getProductsByPriceRange(minPriceWei, maxPriceWei);
       return this.formatProductsArray(products);
@@ -225,7 +225,7 @@ class ProductsService {
       }
 
       // Convert ITC token price to wei (18 decimals)
-      const priceWei = ethers.parseEther(productData.price);
+      const priceWei = parseEther(productData.price);
       const companyIdNum = parseInt(productData.companyId);
       const stockNum = parseInt(productData.stock);
       
@@ -280,7 +280,7 @@ class ProductsService {
         throw new Error('Products contract not available');
       }
 
-      const priceWei = updateData.price ? ethers.parseEther(updateData.price) : undefined;
+      const priceWei = updateData.price ? parseEther(updateData.price) : undefined;
       
       const tx = await productsContract.updateProduct(
         updateData.productId,
@@ -382,7 +382,7 @@ class ProductsService {
       companyId: product.companyId.toString(),
       name: product.name,
       price: product.price.toString(),
-      priceFormatted: ethers.formatEther(product.price), // This is actually in ITC tokens
+      priceFormatted: formatEther(product.price), // This is actually in ITC tokens
       image: product.image,
       stock: product.stock.toString(),
       createdAt: product.createdAt.toString(),
@@ -421,7 +421,7 @@ class ProductsService {
    */
   formatPrice(priceWei: string): string {
     try {
-      return `${ethers.formatEther(priceWei)} ITC`;
+      return `${formatEther(priceWei)} ITC`;
     } catch (error) {
       return '0 ITC';
     }

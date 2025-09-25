@@ -1,18 +1,18 @@
 # E-commerce Smart Contract Platform - Backend
 
-Una plataforma completa de e-commerce construida con Solidity 0.8.20 y Foundry, que incluye tokens ERC-20, gestión de empresas, catálogo de productos, sistema de facturación y seguimiento de clientes con capacidades avanzadas de filtrado y búsqueda.
+A complete e-commerce platform built with Solidity 0.8.20 and Foundry, featuring ERC-20 tokens, company management, product catalog, invoicing system, and client tracking with advanced filtering and search capabilities.
 
-## 🏗️ Arquitectura
+## 🏗️ Architecture
 
-### Contratos Principales
+### Main Contracts
 
-1. **ITCToken20** - Token ERC-20 con funcionalidades de compra/retiro y seguimiento de quemado
-2. **Company** - Sistema de gestión de empresas
-3. **Products** - Catálogo de productos con filtrado y búsqueda avanzada
-4. **Invoice** - Sistema de facturación y gestión de compras
-5. **Clients** - Gestión y seguimiento de clientes
+1. **ITCToken20** - ERC-20 token with buy/withdraw functionality and burn tracking
+2. **Company** - Company management system
+3. **Products** - Product catalog with advanced filtering and search
+4. **Invoice** - Invoicing system and purchase management
+5. **Clients** - Client management and tracking
 
-### Estructura de Directorios
+### Directory Structure
 
 ```
 backend/
@@ -23,75 +23,75 @@ backend/
 │   │   ├── Products.sol
 │   │   ├── Invoice.sol
 │   │   └── Clients.sol
-│   └── interfaces/         # Interfaces de contratos
+│   └── interfaces/         # Contract interfaces
 │       ├── IITCToken20.sol
 │       ├── ICompany.sol
 │       ├── IProducts.sol
 │       ├── IInvoice.sol
 │       └── IClients.sol
-├── test/                   # Tests de Foundry
+├── test/                   # Foundry tests
 │   ├── ITCToken20.t.sol
 │   ├── Company.t.sol
 │   ├── Products.t.sol
 │   ├── Invoice.t.sol
 │   ├── Clients.t.sol
 │   └── Integration.t.sol
-├── script/                 # Scripts de deployment
+├── script/                 # Deployment scripts
 │   ├── Deploy.s.sol
 │   ├── DeployLocal.s.sol
 │   └── SetupTestData.s.sol
-├── deploy_contracts.sh     # Script de deployment automatizado
-└── foundry.toml           # Configuración de Foundry
+├── deploy_contracts.sh     # Automated deployment script
+└── foundry.toml           # Foundry configuration
 ```
 
-## 🚀 Funcionalidades
+## 🚀 Features
 
-### ITCToken20 (Token ERC-20)
-- ✅ Funcionalidad estándar ERC-20
-- ✅ Compra de tokens con ETH
-- ✅ Retiro de tokens por ETH
-- ✅ Precio de token configurable
-- ✅ Límite de suministro máximo (1M tokens)
-- ✅ Capacidades de acuñación/quemado del propietario
-- ✅ Protección contra reentrancia
-- ✅ **Seguimiento completo de tokens quemados**
-- ✅ **Función de auto-quemado para usuarios**
-- ✅ **Estadísticas y historial de quemado**
+### ITCToken20 (ERC-20 Token)
+- ✅ Standard ERC-20 functionality
+- ✅ Buy tokens with ETH
+- ✅ Withdraw tokens for ETH
+- ✅ Configurable token price
+- ✅ Maximum supply limit (1M tokens)
+- ✅ Owner minting/burning capabilities
+- ✅ Reentrancy protection
+- ✅ **Complete burned token tracking**
+- ✅ **Self-burn function for users**
+- ✅ **Burn statistics and history**
 
-### Gestión de Empresas
-- ✅ Crear empresas con nombre y propietario
-- ✅ Actualizar información de empresas
-- ✅ Activar/desactivar empresas
-- ✅ Consultar empresas por propietario
-- ✅ Transferir propiedad de empresas
-- ✅ Filtrado y búsqueda comprehensiva
-- ✅ **Sistema de autorización entre contratos**
+### Company Management
+- ✅ Create companies with name and owner
+- ✅ Update company information
+- ✅ Activate/deactivate companies
+- ✅ Query companies by owner
+- ✅ Transfer company ownership
+- ✅ Comprehensive filtering and search
+- ✅ **Inter-contract authorization system**
 
-### Catálogo de Productos
-- ✅ Crear productos con asociación a empresa
-- ✅ Metadatos de productos (nombre, precio, hash de imagen IPFS)
-- ✅ Filtrado avanzado por empresa, rango de precios, estado activo
-- ✅ Funcionalidad de búsqueda de texto
-- ✅ Operaciones CRUD para productos
-- ✅ Validación de propiedad de empresa
-- ✅ **Gestión de stock en tiempo real**
-- ✅ **Actualización automática de stock en compras**
+### Product Catalog
+- ✅ Create products with company association
+- ✅ Product metadata (name, price, IPFS image hash)
+- ✅ Advanced filtering by company, price range, active status
+- ✅ Text search functionality
+- ✅ CRUD operations for products
+- ✅ Company ownership validation
+- ✅ **Real-time stock management**
+- ✅ **Automatic stock updates on purchases**
 
-### Sistema de Facturación
-- ✅ **Creación de facturas por propietarios de empresa**
-- ✅ **Creación de facturas por clientes (nueva funcionalidad)**
-- ✅ **Gestión de items de factura**
-- ✅ **Integración con sistema de tokens**
-- ✅ **Actualización automática de stock**
-- ✅ **Registro automático de compras de clientes**
-- ✅ **Seguimiento de pagos**
+### Invoicing System
+- ✅ **Invoice creation by company owners**
+- ✅ **Invoice creation by clients (new feature)**
+- ✅ **Invoice item management**
+- ✅ **Token system integration**
+- ✅ **Automatic stock updates**
+- ✅ **Automatic client purchase registration**
+- ✅ **Payment tracking**
 
-### Gestión de Clientes
-- ✅ **Registro de clientes por empresa**
-- ✅ **Seguimiento de compras de clientes**
-- ✅ **Estadísticas de clientes**
-- ✅ **Gestión de estado activo/inactivo**
-- ✅ **Contadores de facturas**
+### Client Management
+- ✅ **Client registration by company**
+- ✅ **Client purchase tracking**
+- ✅ **Client statistics**
+- ✅ **Active/inactive state management**
+- ✅ **Invoice counters**
 
 ## 🛠️ Configuración e Instalación
 

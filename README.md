@@ -1,252 +1,252 @@
 # 🛒 E-commerce Blockchain Platform
 
-Una plataforma completa de e-commerce descentralizada construida con **Solidity**, **React**, **TypeScript** y **Foundry**. Este proyecto demuestra la implementación de un sistema de comercio electrónico moderno utilizando tecnología blockchain, con funcionalidades avanzadas de gestión de empresas, productos, clientes, facturación y tokens.
+A complete decentralized e-commerce platform built with **Solidity**, **React**, **TypeScript**, and **Foundry**. This project demonstrates the implementation of a modern e-commerce system using blockchain technology, with advanced features for company management, products, clients, invoicing, and tokens.
 
-## 🎯 Visión del Proyecto
+## 🎯 Project Vision
 
-Este proyecto fue desarrollado como parte de un curso de desarrollo blockchain, demostrando las mejores prácticas en:
+This project was developed as part of a blockchain development course, demonstrating best practices in:
 
-- **Desarrollo de Smart Contracts** con Solidity 0.8.20
-- **Frontend moderno** con React y TypeScript
-- **Integración blockchain** con ethers.js
-- **Arquitectura descentralizada** y optimización de gas
-- **UX/UI optimizada** para aplicaciones Web3
+- **Smart Contract Development** with Solidity 0.8.20
+- **Modern Frontend** with React and TypeScript
+- **Blockchain Integration** with ethers.js
+- **Decentralized Architecture** and gas optimization
+- **Optimized UX/UI** for Web3 applications
 
-## 🏗️ Arquitectura del Sistema
+## 🏗️ System Architecture
 
-### Stack Tecnológico Completo
+### Complete Technology Stack
 
 #### 🔗 Backend (Blockchain)
-- **Solidity 0.8.20** - Lenguaje de contratos inteligentes
-- **Foundry** - Framework de desarrollo y testing
-- **OpenZeppelin** - Librerías de contratos seguros
-- **Anvil** - Red local de desarrollo
-- **Forge** - Compilador y test runner
+- **Solidity 0.8.20** - Smart contract language
+- **Foundry** - Development and testing framework
+- **OpenZeppelin** - Secure contract libraries
+- **Anvil** - Local development network
+- **Forge** - Compiler and test runner
 
 #### 🎨 Frontend (Web3)
-- **React 18** - Biblioteca de UI moderna
-- **TypeScript** - Tipado estático
-- **Vite** - Build tool ultra-rápido
-- **Tailwind CSS** - Framework CSS utility-first
-- **Ethers.js** - Interacción con blockchain
-- **React Router** - Navegación SPA
-- **Zustand** - Gestión de estado
+- **React 18** - Modern UI library
+- **TypeScript** - Static typing
+- **Vite** - Ultra-fast build tool
+- **Tailwind CSS** - Utility-first CSS framework
+- **Ethers.js** - Blockchain interaction
+- **React Router** - SPA navigation
+- **Zustand** - State management
 
-#### 🛠️ Herramientas de Desarrollo
-- **MetaMask** - Wallet de usuario
-- **ESLint** - Linting de código
-- **Prettier** - Formateo de código
-- **Git** - Control de versiones
+#### 🛠️ Development Tools
+- **MetaMask** - User wallet
+- **ESLint** - Code linting
+- **Prettier** - Code formatting
+- **Git** - Version control
 
-## 📁 Estructura del Proyecto
+## 📁 Project Structure
 
 ```
 codeEcommerce/
 ├── backend/                    # Smart Contracts
 │   ├── src/
-│   │   ├── contracts/         # Contratos principales
+│   │   ├── contracts/         # Main contracts
 │   │   │   ├── ITCToken20.sol
 │   │   │   ├── Company.sol
 │   │   │   ├── Products.sol
 │   │   │   ├── Invoice.sol
 │   │   │   └── Clients.sol
-│   │   └── interfaces/        # Interfaces de contratos
-│   ├── test/                  # Tests comprehensivos
-│   ├── script/                # Scripts de deployment
-│   └── deploy_contracts.sh    # Deployment automatizado
-├── frontend/                   # Aplicación Web
+│   │   └── interfaces/        # Contract interfaces
+│   ├── test/                  # Comprehensive tests
+│   ├── script/                # Deployment scripts
+│   └── deploy_contracts.sh    # Automated deployment
+├── frontend/                   # Web Application
 │   ├── src/
-│   │   ├── components/        # Componentes reutilizables
-│   │   ├── pages/             # Páginas de la aplicación
+│   │   ├── components/        # Reusable components
+│   │   ├── pages/             # Application pages
 │   │   ├── hooks/             # Custom hooks
-│   │   ├── services/          # Servicios de integración
-│   │   ├── types/             # Definiciones TypeScript
-│   │   └── config/            # Configuración
-│   └── dist/                  # Build de producción
-└── README.md                  # Este archivo
+│   │   ├── services/          # Integration services
+│   │   ├── types/             # TypeScript definitions
+│   │   └── config/            # Configuration
+│   └── dist/                  # Production build
+└── README.md                  # This file
 ```
 
-## 🚀 Funcionalidades Principales
+## 🚀 Main Features
 
-### 💰 Sistema de Tokens (ITCToken20)
-- **Token ERC-20** personalizado con funcionalidades avanzadas
-- **Compra de tokens** con ETH
-- **Retiro de tokens** por ETH
-- **Sistema de quemado** con seguimiento completo
-- **Estadísticas de quemado** y historial
-- **Gestión de precios** dinámica
+### 💰 Token System (ITCToken20)
+- **Custom ERC-20 Token** with advanced features
+- **Token purchase** with ETH
+- **Token withdrawal** for ETH
+- **Burn system** with complete tracking
+- **Burn statistics** and history
+- **Dynamic price management**
 
-### 🏢 Gestión de Empresas
-- **CRUD completo** de empresas
-- **Sistema de propietarios** con transferencia
-- **Estados activo/inactivo**
-- **Filtrado y búsqueda** avanzada
-- **Validación de permisos**
+### 🏢 Company Management
+- **Complete CRUD** for companies
+- **Owner system** with transfer capability
+- **Active/inactive states**
+- **Advanced filtering and search**
+- **Permission validation**
 
-### 📦 Catálogo de Productos
-- **Gestión completa** de productos
-- **Asociación con empresas**
-- **Control de stock** en tiempo real
-- **Filtrado avanzado** por múltiples criterios
-- **Búsqueda de texto** inteligente
-- **Metadatos IPFS** para imágenes
+### 📦 Product Catalog
+- **Complete product management**
+- **Company association**
+- **Real-time stock control**
+- **Advanced filtering** by multiple criteria
+- **Intelligent text search**
+- **IPFS metadata** for images
 
-### 🧾 Sistema de Facturación
-- **Creación de facturas** por propietarios y clientes
-- **Gestión de items** de factura
-- **Integración con tokens** para pagos
-- **Actualización automática** de stock
-- **Registro de compras** de clientes
-- **Historial completo** de transacciones
+### 🧾 Invoicing System
+- **Invoice creation** by owners and clients
+- **Invoice item management**
+- **Token integration** for payments
+- **Automatic stock updates**
+- **Client purchase registration**
+- **Complete transaction history**
 
-### 👥 Gestión de Clientes
-- **Registro automático** de clientes
-- **Seguimiento de compras** por empresa
-- **Estadísticas de clientes**
-- **Gestión de estados** activo/inactivo
-- **Contadores de facturas**
+### 👥 Client Management
+- **Automatic client registration**
+- **Purchase tracking** by company
+- **Client statistics**
+- **Active/inactive state management**
+- **Invoice counters**
 
-### 🎨 Experiencia de Usuario
-- **Temas dinámicos** basados en rol (Azul/Naranja/Verde)
-- **Navegación condicional** según estado de conexión
-- **Optimización de transacciones** (mínimas confirmaciones)
-- **Notificaciones toast** para feedback
-- **Estados de carga** y manejo de errores
+### 🎨 User Experience
+- **Dynamic themes** based on role (Blue/Orange/Green)
+- **Conditional navigation** based on connection status
+- **Transaction optimization** (minimal confirmations)
+- **Toast notifications** for feedback
+- **Loading states** and error handling
 
-### 🔐 Panel de Administración
-- **Dashboard completo** con estadísticas
-- **Gestión CRUD** de todas las entidades
-- **Estadísticas avanzadas** del sistema
-- **Historial de facturas** y transacciones
-- **Gestión de tokens** y balance
+### 🔐 Administration Panel
+- **Complete dashboard** with statistics
+- **CRUD management** of all entities
+- **Advanced system statistics**
+- **Invoice and transaction history**
+- **Token and balance management**
 
-## 🛠️ Estrategias de Desarrollo
+## 🛠️ Development Strategies
 
-### 🔒 Seguridad
-- **ReentrancyGuard** en operaciones críticas
-- **Validación de entrada** comprehensiva
-- **Control de acceso** basado en roles
-- **Verificación de permisos** entre contratos
-- **Safe Math** integrado para prevenir overflow
+### 🔒 Security
+- **ReentrancyGuard** in critical operations
+- **Comprehensive input validation**
+- **Role-based access control**
+- **Permission verification** between contracts
+- **Integrated Safe Math** to prevent overflow
 
-### ⚡ Optimización de Gas
-- **Transacciones agrupadas** para reducir costos
-- **Aprobación única** de tokens para múltiples operaciones
-- **Patrones de almacenamiento** eficientes
-- **Llamadas externas** mínimas
-- **Structs empaquetados** para ahorrar espacio
+### ⚡ Gas Optimization
+- **Batched transactions** to reduce costs
+- **Single approval** of tokens for multiple operations
+- **Efficient storage patterns**
+- **Minimal external calls**
+- **Packed structs** to save space
 
-### 🎯 UX/UI Optimizada
-- **Code splitting** para mejor rendimiento
-- **Lazy loading** de componentes
-- **Bundle optimization** con Vite
-- **Tree shaking** de dependencias
-- **Temas dinámicos** para mejor experiencia
+### 🎯 Optimized UX/UI
+- **Code splitting** for better performance
+- **Lazy loading** of components
+- **Bundle optimization** with Vite
+- **Tree shaking** of dependencies
+- **Dynamic themes** for better experience
 
-### 🧪 Testing Comprehensivo
-- **190+ tests** cubriendo todos los contratos
-- **Tests unitarios** para cada función
-- **Tests de integración** entre contratos
-- **Tests fuzz** para validación robusta
-- **Tests de casos edge** y manejo de errores
+### 🧪 Comprehensive Testing
+- **190+ tests** covering all contracts
+- **Unit tests** for each function
+- **Integration tests** between contracts
+- **Fuzz tests** for robust validation
+- **Edge case tests** and error handling
 
-## 🚀 Instalación y Configuración
+## 🚀 Installation and Setup
 
-### Prerrequisitos
+### Prerequisites
 - **Node.js 18+**
-- **Foundry** instalado
-- **MetaMask** en el navegador
-- **Git** para clonar el repositorio
+- **Foundry** installed
+- **MetaMask** in browser
+- **Git** to clone repository
 
-### Configuración Rápida
+### Quick Setup
 
-1. **Clona el repositorio:**
+1. **Clone the repository:**
 ```bash
 git clone <repository-url>
 cd codeEcommerce
 ```
 
-2. **Configura el backend:**
+2. **Setup the backend:**
 ```bash
 cd backend
 forge install
 forge build
 ```
 
-3. **Configura el frontend:**
+3. **Setup the frontend:**
 ```bash
 cd ../frontend
 npm install
 ```
 
-4. **Inicia Anvil (en una terminal separada):**
+4. **Start Anvil (in a separate terminal):**
 ```bash
 anvil
 ```
 
-5. **Despliega los contratos:**
+5. **Deploy the contracts:**
 ```bash
 cd backend
 ./deploy_contracts.sh
 ```
 
-6. **Inicia el frontend:**
+6. **Start the frontend:**
 ```bash
 cd ../frontend
 npm run dev
 ```
 
-7. **Abre [http://localhost:5173](http://localhost:5173)** en tu navegador
+7. **Open [http://localhost:5173](http://localhost:5173)** in your browser
 
-## 📖 Documentación Detallada
+## 📖 Detailed Documentation
 
 ### Backend (Smart Contracts)
-📚 **[Ver README del Backend](./backend/README.md)**
-- Arquitectura de contratos
-- Funcionalidades detalladas
-- Guías de testing
-- Scripts de deployment
-- Ejemplos de uso
+📚 **[View Backend README](./backend/README.md)**
+- Contract architecture
+- Detailed features
+- Testing guides
+- Deployment scripts
+- Usage examples
 
-### Frontend (Aplicación Web)
-📚 **[Ver README del Frontend](./frontend/README.md)**
-- Stack tecnológico
-- Estructura de componentes
-- Hooks personalizados
-- Optimizaciones de rendimiento
-- Guías de desarrollo
+### Frontend (Web Application)
+📚 **[View Frontend README](./frontend/README.md)**
+- Technology stack
+- Component structure
+- Custom hooks
+- Performance optimizations
+- Development guides
 
-## 🎓 Conceptos de Blockchain Implementados
+## 🎓 Implemented Blockchain Concepts
 
 ### 🔗 Smart Contracts
-- **ERC-20 Token Standard** con extensiones personalizadas
-- **Ownership Pattern** para control de acceso
-- **Factory Pattern** para creación de entidades
-- **Event-Driven Architecture** para indexación off-chain
+- **ERC-20 Token Standard** with custom extensions
+- **Ownership Pattern** for access control
+- **Factory Pattern** for entity creation
+- **Event-Driven Architecture** for off-chain indexing
 
-### 💡 Patrones de Diseño
-- **Repository Pattern** para gestión de datos
-- **Service Layer** para lógica de negocio
-- **Observer Pattern** con eventos de blockchain
-- **Strategy Pattern** para diferentes tipos de usuarios
+### 💡 Design Patterns
+- **Repository Pattern** for data management
+- **Service Layer** for business logic
+- **Observer Pattern** with blockchain events
+- **Strategy Pattern** for different user types
 
-### 🔄 Flujos de Transacción
-- **Multi-step Transactions** con validación
-- **Batch Operations** para optimización de gas
-- **Error Handling** comprehensivo
-- **State Management** consistente
+### 🔄 Transaction Flows
+- **Multi-step Transactions** with validation
+- **Batch Operations** for gas optimization
+- **Comprehensive Error Handling**
+- **Consistent State Management**
 
-## 🧪 Testing y Calidad
+## 🧪 Testing and Quality
 
 ### Backend Testing
 ```bash
-# Ejecutar todos los tests
+# Run all tests
 forge test
 
-# Tests con reporte de gas
+# Tests with gas report
 forge test --gas-report
 
-# Tests con cobertura
+# Tests with coverage
 forge coverage
 ```
 
@@ -258,119 +258,119 @@ npm run lint
 # Type checking
 npm run type-check
 
-# Build de producción
+# Production build
 npm run build
 ```
 
 ## 🚀 Deployment
 
-### Desarrollo Local
-- **Anvil** para red local
-- **MetaMask** configurado para localhost
-- **Hot reload** en desarrollo
+### Local Development
+- **Anvil** for local network
+- **MetaMask** configured for localhost
+- **Hot reload** in development
 
-### Producción
-- **Sepolia Testnet** para testing
-- **Mainnet** para producción
-- **Verificación de contratos** en Etherscan
+### Production
+- **Sepolia Testnet** for testing
+- **Mainnet** for production
+- **Contract verification** on Etherscan
 
-## 📊 Métricas del Proyecto
+## 📊 Project Metrics
 
 ### Smart Contracts
-- **5 contratos** principales
-- **190+ tests** con 100% de cobertura
-- **Optimización de gas** implementada
-- **Eventos** para indexación off-chain
+- **5 main contracts**
+- **190+ tests** with 100% coverage
+- **Gas optimization** implemented
+- **Events** for off-chain indexing
 
 ### Frontend
-- **15+ páginas** y componentes
-- **10+ hooks** personalizados
-- **7 servicios** de integración
-- **Bundle optimizado** < 1MB
+- **15+ pages** and components
+- **10+ custom hooks**
+- **7 integration services**
+- **Optimized bundle** < 1MB
 
-### Funcionalidades
-- **CRUD completo** para todas las entidades
-- **Sistema de roles** (Admin, Cliente, No conectado)
-- **Temas dinámicos** por rol de usuario
-- **Optimización de transacciones** (2 confirmaciones máximo)
+### Features
+- **Complete CRUD** for all entities
+- **Role system** (Admin, Client, Not connected)
+- **Dynamic themes** by user role
+- **Transaction optimization** (2 confirmations maximum)
 
-## 🤝 Contribución
+## 🤝 Contributing
 
-### Cómo Contribuir
-1. Fork el repositorio
-2. Crea una rama de feature
-3. Implementa tus cambios
-4. Añade tests si es necesario
-5. Ejecuta la suite de tests
-6. Envía un Pull Request
+### How to Contribute
+1. Fork the repository
+2. Create a feature branch
+3. Implement your changes
+4. Add tests if necessary
+5. Run the test suite
+6. Submit a Pull Request
 
-### Estándares de Código
-- **Solidity**: Sigue las mejores prácticas de OpenZeppelin
-- **TypeScript**: Tipado estricto y interfaces claras
-- **React**: Componentes funcionales con hooks
-- **Testing**: Cobertura completa de funcionalidades
+### Code Standards
+- **Solidity**: Follow OpenZeppelin best practices
+- **TypeScript**: Strict typing and clear interfaces
+- **React**: Functional components with hooks
+- **Testing**: Complete feature coverage
 
-## 📄 Licencia
+## 📄 License
 
-Este proyecto está licenciado bajo la **Licencia MIT** - ver el archivo [LICENSE](./LICENSE) para detalles.
+This project is licensed under the **MIT License** - see the [LICENSE](./LICENSE) file for details.
 
-## 🆘 Soporte
+## 🆘 Support
 
-### Recursos de Ayuda
-- **Issues del repositorio** para reportar bugs
-- **Documentación detallada** en cada README
-- **Ejemplos de código** en tests y componentes
-- **Comentarios en código** para explicaciones
+### Help Resources
+- **Repository issues** to report bugs
+- **Detailed documentation** in each README
+- **Code examples** in tests and components
+- **Code comments** for explanations
 
-### Contacto
-- Crea un issue en el repositorio
-- Revisa la documentación existente
-- Consulta los ejemplos de uso
+### Contact
+- Create an issue in the repository
+- Review existing documentation
+- Consult usage examples
 
-## 🚀 Próximos Pasos
+## 🚀 Next Steps
 
-### Funcionalidades Completadas ✅
-- [x] Sistema de tokens completo
-- [x] Gestión de empresas y productos
-- [x] Sistema de facturación
-- [x] Panel de administración
-- [x] Temas dinámicos
-- [x] Optimización de transacciones
-- [x] Historial de tokens quemados
-- [x] Testing comprehensivo
+### Completed Features ✅
+- [x] Complete token system
+- [x] Company and product management
+- [x] Invoicing system
+- [x] Administration panel
+- [x] Dynamic themes
+- [x] Transaction optimization
+- [x] Token burn history
+- [x] Comprehensive testing
 
-### Roadmap Futuro 🎯
+### Future Roadmap 🎯
 - [ ] **PWA (Progressive Web App)**
-- [ ] **Modo offline** con sincronización
-- [ ] **Internacionalización (i18n)**
-- [ ] **Analytics y métricas** avanzadas
-- [ ] **Sistema de notificaciones** push
-- [ ] **Integración con más wallets**
-- [ ] **Tests E2E** con Playwright
-- [ ] **CI/CD pipeline** automatizado
-- [ ] **Documentación interactiva**
-- [ ] **Sistema de reviews** y ratings
+- [ ] **Offline mode** with synchronization
+- [ ] **Internationalization (i18n)**
+- [ ] **Advanced analytics** and metrics
+- [ ] **Push notification system**
+- [ ] **Integration with more wallets**
+- [ ] **E2E tests** with Playwright
+- [ ] **Automated CI/CD pipeline**
+- [ ] **Interactive documentation**
+- [ ] **Review and rating system**
 
-## 🎓 Aprendizajes del Proyecto
+## 🎓 Project Learnings
 
 ### Blockchain Development
-- **Smart Contract Architecture** y mejores prácticas
-- **Gas Optimization** y eficiencia de transacciones
-- **Security Patterns** y prevención de vulnerabilidades
-- **Testing Strategies** para contratos inteligentes
+- **Smart Contract Architecture** and best practices
+- **Gas Optimization** and transaction efficiency
+- **Security Patterns** and vulnerability prevention
+- **Testing Strategies** for smart contracts
 
 ### Frontend Development
-- **Web3 Integration** con ethers.js
-- **State Management** en aplicaciones blockchain
-- **UX Optimization** para transacciones
-- **Performance Optimization** con code splitting
+- **Web3 Integration** with ethers.js
+- **State Management** in blockchain applications
+- **UX Optimization** for transactions
+- **Performance Optimization** with code splitting
 
 ### Full-Stack Integration
-- **Contract-Frontend Communication** eficiente
-- **Error Handling** en aplicaciones Web3
-- **User Experience** en aplicaciones descentralizadas
-- **Development Workflow** para proyectos blockchain
+- **Efficient Contract-Frontend Communication**
+- **Error Handling** in Web3 applications
+- **User Experience** in decentralized applications
+- **Development Workflow** for blockchain projects
 
 ---
 
-**🎉 ¡Este proyecto demuestra un ecosistema completo de e-commerce blockchain, desde smart contracts hasta una interfaz de usuario moderna y optimizada!**
+**🎉 This project demonstrates a complete blockchain e-commerce ecosystem, from smart contracts to a modern and optimized user interface!**

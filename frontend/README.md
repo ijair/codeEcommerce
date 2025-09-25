@@ -1,38 +1,38 @@
 # E-commerce Frontend - React + TypeScript + Vite
 
-Frontend moderno y optimizado para la plataforma de e-commerce construido con React, TypeScript, Vite y Tailwind CSS. Incluye integración completa con contratos inteligentes, gestión de estado avanzada, y una experiencia de usuario optimizada.
+Modern and optimized frontend for the e-commerce platform built with React, TypeScript, Vite, and Tailwind CSS. Includes complete integration with smart contracts, advanced state management, and an optimized user experience.
 
-## 🏗️ Arquitectura
+## 🏗️ Architecture
 
-### Stack Tecnológico
+### Technology Stack
 
-- **React 18** - Biblioteca de UI con hooks modernos
-- **TypeScript** - Tipado estático para mayor robustez
-- **Vite** - Build tool ultra-rápido con HMR
-- **Tailwind CSS** - Framework CSS utility-first
-- **Ethers.js** - Interacción con blockchain Ethereum
-- **React Router** - Navegación SPA
-- **Zustand** - Gestión de estado ligera y eficiente
+- **React 18** - Modern UI library with hooks
+- **TypeScript** - Static typing for greater robustness
+- **Vite** - Ultra-fast build tool with HMR
+- **Tailwind CSS** - Utility-first CSS framework
+- **Ethers.js** - Ethereum blockchain interaction
+- **React Router** - SPA navigation
+- **Zustand** - Lightweight and efficient state management
 
-### Estructura de Directorios
+### Directory Structure
 
 ```
 frontend/
 ├── src/
-│   ├── components/         # Componentes reutilizables
+│   ├── components/         # Reusable components
 │   │   ├── ProductCard.tsx
 │   │   ├── ShoppingCart.tsx
 │   │   ├── Header.tsx
 │   │   ├── Toast.tsx
 │   │   └── ToastContainer.tsx
-│   ├── pages/             # Páginas de la aplicación
+│   ├── pages/             # Application pages
 │   │   ├── Home.tsx
 │   │   ├── Products.tsx
 │   │   ├── MyBalance.tsx
 │   │   ├── WithdrawTokens.tsx
 │   │   ├── PurchaseHistory.tsx
 │   │   ├── Invoice.tsx
-│   │   └── admin/         # Páginas de administración
+│   │   └── admin/         # Administration pages
 │   │       ├── AdminDashboard.tsx
 │   │       ├── AdminProducts.tsx
 │   │       ├── AdminCompanies.tsx
@@ -49,7 +49,7 @@ frontend/
 │   │   ├── useProducts.ts
 │   │   ├── useToast.ts
 │   │   └── useTheme.ts
-│   ├── services/          # Servicios de integración
+│   ├── services/          # Integration services
 │   │   ├── contractService.ts
 │   │   ├── tokenService.ts
 │   │   ├── productService.ts
@@ -58,167 +58,167 @@ frontend/
 │   │   ├── checkoutService.ts
 │   │   ├── adminStatsService.ts
 │   │   └── burnHistoryService.ts
-│   ├── types/             # Definiciones de tipos
+│   ├── types/             # Type definitions
 │   │   └── contracts.ts
-│   ├── config/            # Configuración
+│   ├── config/            # Configuration
 │   │   └── contracts.ts
-│   ├── common/            # Componentes comunes
+│   ├── common/            # Common components
 │   │   ├── Header.tsx
 │   │   └── Layout.tsx
-│   └── utils/             # Utilidades
-├── public/                # Archivos estáticos
-├── dist/                  # Build de producción
+│   └── utils/             # Utilities
+├── public/                # Static files
+├── dist/                  # Production build
 └── package.json
 ```
 
-## 🚀 Funcionalidades
+## 🚀 Features
 
 ### 🛍️ E-commerce Core
-- ✅ **Catálogo de productos** con filtrado avanzado
-- ✅ **Carrito de compras** persistente
-- ✅ **Proceso de checkout** optimizado
-- ✅ **Sistema de facturación** completo
-- ✅ **Historial de compras** para clientes
-- ✅ **Gestión de stock** en tiempo real
+- ✅ **Product catalog** with advanced filtering
+- ✅ **Persistent shopping cart**
+- ✅ **Optimized checkout process**
+- ✅ **Complete invoicing system**
+- ✅ **Purchase history** for clients
+- ✅ **Real-time stock management**
 
-### 👤 Gestión de Usuarios
-- ✅ **Conexión de wallet** (MetaMask)
-- ✅ **Roles de usuario** (Admin, Cliente, No conectado)
-- ✅ **Temas dinámicos** basados en rol de usuario
-- ✅ **Navegación condicional** según estado de conexión
-- ✅ **Gestión de balance** de tokens y ETH
+### 👤 User Management
+- ✅ **Wallet connection** (MetaMask)
+- ✅ **User roles** (Admin, Client, Not connected)
+- ✅ **Dynamic themes** based on user role
+- ✅ **Conditional navigation** based on connection status
+- ✅ **Token and ETH balance management**
 
-### 🔐 Panel de Administración
-- ✅ **Dashboard administrativo** con estadísticas
-- ✅ **Gestión de empresas** (CRUD completo)
-- ✅ **Gestión de productos** (CRUD completo)
-- ✅ **Gestión de clientes** (activar/desactivar)
-- ✅ **Historial de facturas** completo
-- ✅ **Estadísticas avanzadas** del sistema
-- ✅ **Gestión de tokens** y balance
+### 🔐 Administration Panel
+- ✅ **Administrative dashboard** with statistics
+- ✅ **Company management** (complete CRUD)
+- ✅ **Product management** (complete CRUD)
+- ✅ **Client management** (activate/deactivate)
+- ✅ **Complete invoice history**
+- ✅ **Advanced system statistics**
+- ✅ **Token and balance management**
 
-### 🎨 Experiencia de Usuario
-- ✅ **Temas dinámicos** (Azul, Naranja, Verde)
-- ✅ **Navegación responsiva** y optimizada
-- ✅ **Notificaciones toast** para feedback
-- ✅ **Estados de carga** y manejo de errores
-- ✅ **Optimización de confirmaciones** MetaMask
-- ✅ **Búsqueda y filtrado** avanzado
+### 🎨 User Experience
+- ✅ **Dynamic themes** (Blue, Orange, Green)
+- ✅ **Responsive and optimized navigation**
+- ✅ **Toast notifications** for feedback
+- ✅ **Loading states** and error handling
+- ✅ **MetaMask confirmation optimization**
+- ✅ **Advanced search and filtering**
 
-### 🔥 Funcionalidades Avanzadas
-- ✅ **Sistema de quemado de tokens** con historial
-- ✅ **Estadísticas de tokens quemados**
-- ✅ **Optimización de gas** y transacciones
-- ✅ **Código splitting** para mejor rendimiento
-- ✅ **Lazy loading** de componentes
+### 🔥 Advanced Features
+- ✅ **Token burn system** with history
+- ✅ **Burned token statistics**
+- ✅ **Gas and transaction optimization**
+- ✅ **Code splitting** for better performance
+- ✅ **Lazy loading** of components
 
-## 🛠️ Configuración e Instalación
+## 🛠️ Setup and Installation
 
-### Prerrequisitos
+### Prerequisites
 - Node.js 18+ 
-- npm o yarn
-- MetaMask instalado en el navegador
-- Anvil ejecutándose localmente (para desarrollo)
+- npm or yarn
+- MetaMask installed in browser
+- Anvil running locally (for development)
 
-### Instalación
+### Installation
 
-1. Navega al directorio frontend:
+1. Navigate to the frontend directory:
 ```bash
 cd frontend
 ```
 
-2. Instala las dependencias:
+2. Install dependencies:
 ```bash
 npm install
 ```
 
-3. Configura las variables de entorno:
+3. Configure environment variables:
 ```bash
 cp env.example .env
 ```
 
-4. Inicia el servidor de desarrollo:
+4. Start the development server:
 ```bash
 npm run dev
 ```
 
-5. Abre [http://localhost:5173](http://localhost:5173) en tu navegador
+5. Open [http://localhost:5173](http://localhost:5173) in your browser
 
-## 🏗️ Scripts Disponibles
+## 🏗️ Available Scripts
 
 ```bash
-# Desarrollo
-npm run dev          # Servidor de desarrollo con HMR
+# Development
+npm run dev          # Development server with HMR
 
-# Construcción
-npm run build        # Build de producción optimizado
-npm run preview      # Preview del build de producción
+# Build
+npm run build        # Optimized production build
+npm run preview      # Preview production build
 
-# Linting y Formateo
-npm run lint         # Ejecutar ESLint
-npm run lint:fix     # Corregir errores de linting automáticamente
+# Linting and Formatting
+npm run lint         # Run ESLint
+npm run lint:fix     # Automatically fix linting errors
 
 # Type Checking
-npm run type-check   # Verificar tipos TypeScript
+npm run type-check   # Verify TypeScript types
 ```
 
-## 🎨 Sistema de Temas
+## 🎨 Theme System
 
-### Temas Dinámicos por Rol
-- **🔵 Azul (Default)**: Usuario no conectado
-- **🟠 Naranja (Admin)**: Usuario administrador conectado
-- **🟢 Verde (Cliente)**: Usuario cliente conectado
+### Dynamic Themes by Role
+- **🔵 Blue (Default)**: Not connected user
+- **🟠 Orange (Admin)**: Connected admin user
+- **🟢 Green (Client)**: Connected client user
 
-### Implementación
+### Implementation
 ```typescript
-// Hook personalizado para temas
+// Custom hook for themes
 const { theme, getThemeClasses } = useTheme();
 
-// Aplicar clases dinámicas
+// Apply dynamic classes
 <button className={getThemeClasses('bg-primary text-white')}>
-  Botón con tema dinámico
+  Button with dynamic theme
 </button>
 ```
 
-## 🔗 Integración con Blockchain
+## 🔗 Blockchain Integration
 
-### Servicios de Contratos
-- **contractService.ts**: Instancias de contratos y ABIs
-- **tokenService.ts**: Operaciones con tokens ITC
-- **productService.ts**: Gestión de productos
-- **companyService.ts**: Gestión de empresas
-- **clientService.ts**: Gestión de clientes
-- **checkoutService.ts**: Proceso de checkout optimizado
-- **burnHistoryService.ts**: Historial de tokens quemados
+### Contract Services
+- **contractService.ts**: Contract instances and ABIs
+- **tokenService.ts**: ITC token operations
+- **productService.ts**: Product management
+- **companyService.ts**: Company management
+- **clientService.ts**: Client management
+- **checkoutService.ts**: Optimized checkout process
+- **burnHistoryService.ts**: Burned token history
 
-### Hooks Personalizados
+### Custom Hooks
 ```typescript
-// Conexión de wallet
+// Wallet connection
 const { isConnected, address, connect, disconnect } = useWallet();
 
-// Gestión de tokens
+// Token management
 const { balance, buyTokens, burnTokens } = useTokens();
 
-// Carrito de compras
+// Shopping cart
 const { items, addItem, removeItem, clearCart } = useCart();
 
-// Proceso de checkout
+// Checkout process
 const { processCheckout, isLoading } = useCheckout();
 
-// Gestión de productos
+// Product management
 const { products, loading, refreshProducts } = useProducts();
 ```
 
-## 🚀 Optimizaciones de Rendimiento
+## 🚀 Performance Optimizations
 
 ### Code Splitting
-- **Lazy loading** de páginas administrativas
-- **Chunks optimizados** por funcionalidad
-- **Tree shaking** de dependencias
+- **Lazy loading** of administrative pages
+- **Optimized chunks** by functionality
+- **Tree shaking** of dependencies
 
 ### Bundle Optimization
 ```typescript
-// Configuración de Vite optimizada
+// Optimized Vite configuration
 export default defineConfig({
   build: {
     rollupOptions: {
@@ -238,33 +238,33 @@ export default defineConfig({
 });
 ```
 
-### Optimización de Transacciones
-- **Aprobación única** de tokens para múltiples compras
-- **Transacciones agrupadas** por compañía
-- **Estimación de gas** optimizada
+### Transaction Optimization
+- **Single approval** of tokens for multiple purchases
+- **Batched transactions** by company
+- **Optimized gas estimation**
 
-## 🎯 Flujo de Usuario
+## 🎯 User Flow
 
-### Usuario No Conectado
-1. **Navegación limitada**: Solo Home y Products
-2. **Exploración libre**: Puede ver productos sin conexión
-3. **Prompt de conexión**: Al intentar agregar al carrito
+### Not Connected User
+1. **Limited navigation**: Only Home and Products
+2. **Free exploration**: Can view products without connection
+3. **Connection prompt**: When trying to add to cart
 
-### Usuario Cliente
-1. **Conexión de wallet**: MetaMask integration
-2. **Navegación completa**: Acceso a todas las funciones
-3. **Tema verde**: Indicador visual de rol
-4. **Compra optimizada**: 2 confirmaciones máximo
+### Client User
+1. **Wallet connection**: MetaMask integration
+2. **Complete navigation**: Access to all functions
+3. **Green theme**: Visual role indicator
+4. **Optimized purchase**: Maximum 2 confirmations
 
-### Usuario Administrador
-1. **Panel administrativo**: Acceso completo al sistema
-2. **Tema naranja**: Indicador visual de rol
-3. **Gestión completa**: CRUD de empresas, productos, clientes
-4. **Estadísticas avanzadas**: Dashboard con métricas
+### Administrator User
+1. **Administrative panel**: Complete system access
+2. **Orange theme**: Visual role indicator
+3. **Complete management**: CRUD of companies, products, clients
+4. **Advanced statistics**: Dashboard with metrics
 
-## 🔧 Configuración Avanzada
+## 🔧 Advanced Configuration
 
-### Variables de Entorno
+### Environment Variables
 ```bash
 # .env
 VITE_RPC_URL=http://127.0.0.1:8545
@@ -272,7 +272,7 @@ VITE_CHAIN_ID=31337
 VITE_CONTRACT_ADDRESSES='{"ITCToken20":"0x...","Company":"0x..."}'
 ```
 
-### Configuración de Contratos
+### Contract Configuration
 ```typescript
 // src/config/contracts.ts
 export const CONTRACT_ADDRESSES = {
@@ -286,36 +286,36 @@ export const CONTRACT_ADDRESSES = {
 };
 ```
 
-## 🧪 Testing y Calidad
+## 🧪 Testing and Quality
 
-### Herramientas de Calidad
-- **ESLint**: Linting de código
-- **TypeScript**: Verificación de tipos
-- **Vite**: Build optimizado
-- **Tailwind CSS**: Clases utilitarias
+### Quality Tools
+- **ESLint**: Code linting
+- **TypeScript**: Type verification
+- **Vite**: Optimized build
+- **Tailwind CSS**: Utility classes
 
-### Mejores Prácticas
-- **Componentes funcionales** con hooks
-- **Tipado estricto** con TypeScript
-- **Separación de responsabilidades** en servicios
-- **Manejo de errores** comprehensivo
-- **Estados de carga** para mejor UX
+### Best Practices
+- **Functional components** with hooks
+- **Strict typing** with TypeScript
+- **Separation of concerns** in services
+- **Comprehensive error handling**
+- **Loading states** for better UX
 
 ## 🚀 Deployment
 
-### Build de Producción
+### Production Build
 ```bash
 npm run build
 ```
 
-### Optimizaciones de Build
-- **Minificación** con esbuild
-- **Code splitting** automático
-- **Tree shaking** de dependencias
-- **Compresión gzip** habilitada
-- **Assets optimizados**
+### Build Optimizations
+- **Minification** with esbuild
+- **Automatic code splitting**
+- **Tree shaking** of dependencies
+- **Gzip compression** enabled
+- **Optimized assets**
 
-### Estructura de Build
+### Build Structure
 ```
 dist/
 ├── index.html
@@ -328,55 +328,55 @@ dist/
 └── vite.svg
 ```
 
-## 🔍 Debugging y Desarrollo
+## 🔍 Debugging and Development
 
-### Herramientas de Desarrollo
-- **React DevTools**: Inspección de componentes
-- **MetaMask DevTools**: Debugging de transacciones
+### Development Tools
+- **React DevTools**: Component inspection
+- **MetaMask DevTools**: Transaction debugging
 - **Vite HMR**: Hot Module Replacement
-- **TypeScript**: IntelliSense y error checking
+- **TypeScript**: IntelliSense and error checking
 
-### Logs y Monitoreo
+### Logs and Monitoring
 ```typescript
-// Logging estructurado
+// Structured logging
 console.log('🛒 Adding item to cart:', { productId, quantity });
 console.log('✅ Transaction completed:', { hash, receipt });
 console.log('❌ Transaction failed:', { error, reason });
 ```
 
-## 🤝 Contribución
+## 🤝 Contributing
 
-1. Fork el repositorio
-2. Crea una rama de feature: `git checkout -b feature/nueva-funcionalidad`
-3. Realiza tus cambios
-4. Ejecuta tests: `npm run lint && npm run type-check`
-5. Commit tus cambios: `git commit -m 'feat: añadir nueva funcionalidad'`
-6. Push a la rama: `git push origin feature/nueva-funcionalidad`
-7. Abre un Pull Request
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/new-feature`
+3. Make your changes
+4. Run tests: `npm run lint && npm run type-check`
+5. Commit your changes: `git commit -m 'feat: add new feature'`
+6. Push to branch: `git push origin feature/new-feature`
+7. Open a Pull Request
 
-## 📄 Licencia
+## 📄 License
 
-Este proyecto está licenciado bajo la Licencia MIT - ver el archivo LICENSE para detalles.
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-## 🆘 Soporte
+## 🆘 Support
 
-Para soporte y preguntas:
-- Crea un issue en el repositorio
-- Revisa la documentación de los hooks
-- Consulta los ejemplos en los componentes
-- Revisa la configuración de contratos
+For support and questions:
+- Create an issue in the repository
+- Review the hooks documentation
+- Consult examples in components
+- Review contract configuration
 
-## 🚀 Próximos Pasos
+## 🚀 Next Steps
 
-- [x] Sistema de temas dinámicos
-- [x] Optimización de transacciones
-- [x] Panel administrativo completo
-- [x] Sistema de notificaciones
-- [x] Historial de tokens quemados
-- [ ] Tests unitarios con Jest/Vitest
+- [x] Dynamic theme system
+- [x] Transaction optimization
+- [x] Complete administrative panel
+- [x] Notification system
+- [x] Burned token history
+- [ ] Unit tests with Jest/Vitest
 - [ ] PWA (Progressive Web App)
-- [ ] Modo offline
-- [ ] Internacionalización (i18n)
-- [ ] Analytics y métricas de usuario
-- [ ] Sistema de notificaciones push
-- [ ] Integración con más wallets
+- [ ] Offline mode
+- [ ] Internationalization (i18n)
+- [ ] User analytics and metrics
+- [ ] Push notification system
+- [ ] Integration with more wallets

@@ -1,16 +1,18 @@
-# E-commerce Smart Contract Platform
+# E-commerce Smart Contract Platform - Backend
 
-A complete e-commerce platform built with Solidity 0.8.20 and Foundry, featuring ERC-20 tokens, company management, and product catalog with advanced filtering capabilities.
+Una plataforma completa de e-commerce construida con Solidity 0.8.20 y Foundry, que incluye tokens ERC-20, gestión de empresas, catálogo de productos, sistema de facturación y seguimiento de clientes con capacidades avanzadas de filtrado y búsqueda.
 
-## 🏗️ Architecture
+## 🏗️ Arquitectura
 
-### Contracts
+### Contratos Principales
 
-1. **ITCToken20** - ERC-20 token with buy/withdraw functionality
-2. **Company** - Company management system
-3. **Products** - Product catalog with filtering and search
+1. **ITCToken20** - Token ERC-20 con funcionalidades de compra/retiro y seguimiento de quemado
+2. **Company** - Sistema de gestión de empresas
+3. **Products** - Catálogo de productos con filtrado y búsqueda avanzada
+4. **Invoice** - Sistema de facturación y gestión de compras
+5. **Clients** - Gestión y seguimiento de clientes
 
-### Directory Structure
+### Estructura de Directorios
 
 ```
 backend/
@@ -18,174 +20,215 @@ backend/
 │   ├── contracts/          # Smart contracts
 │   │   ├── ITCToken20.sol
 │   │   ├── Company.sol
-│   │   └── Products.sol
-│   └── interfaces/         # Contract interfaces
+│   │   ├── Products.sol
+│   │   ├── Invoice.sol
+│   │   └── Clients.sol
+│   └── interfaces/         # Interfaces de contratos
 │       ├── IITCToken20.sol
 │       ├── ICompany.sol
-│       └── IProducts.sol
-├── test/                   # Foundry tests
+│       ├── IProducts.sol
+│       ├── IInvoice.sol
+│       └── IClients.sol
+├── test/                   # Tests de Foundry
 │   ├── ITCToken20.t.sol
 │   ├── Company.t.sol
 │   ├── Products.t.sol
+│   ├── Invoice.t.sol
+│   ├── Clients.t.sol
 │   └── Integration.t.sol
-├── script/                 # Deployment scripts
+├── script/                 # Scripts de deployment
 │   ├── Deploy.s.sol
-│   └── DeployLocal.s.sol
-└── foundry.toml           # Foundry configuration
+│   ├── DeployLocal.s.sol
+│   └── SetupTestData.s.sol
+├── deploy_contracts.sh     # Script de deployment automatizado
+└── foundry.toml           # Configuración de Foundry
 ```
 
-## 🚀 Features
+## 🚀 Funcionalidades
 
-### ITCToken20 (ERC-20 Token)
-- ✅ Standard ERC-20 functionality
-- ✅ Buy tokens with ETH
-- ✅ Withdraw tokens for ETH
-- ✅ Configurable token price
-- ✅ Maximum supply limit (1M tokens)
-- ✅ Owner minting/burning capabilities
-- ✅ Reentrancy protection
+### ITCToken20 (Token ERC-20)
+- ✅ Funcionalidad estándar ERC-20
+- ✅ Compra de tokens con ETH
+- ✅ Retiro de tokens por ETH
+- ✅ Precio de token configurable
+- ✅ Límite de suministro máximo (1M tokens)
+- ✅ Capacidades de acuñación/quemado del propietario
+- ✅ Protección contra reentrancia
+- ✅ **Seguimiento completo de tokens quemados**
+- ✅ **Función de auto-quemado para usuarios**
+- ✅ **Estadísticas y historial de quemado**
 
-### Company Management
-- ✅ Create companies with name and owner
-- ✅ Update company information
-- ✅ Activate/deactivate companies
-- ✅ Query companies by owner
-- ✅ Transfer company ownership
-- ✅ Comprehensive filtering and search
+### Gestión de Empresas
+- ✅ Crear empresas con nombre y propietario
+- ✅ Actualizar información de empresas
+- ✅ Activar/desactivar empresas
+- ✅ Consultar empresas por propietario
+- ✅ Transferir propiedad de empresas
+- ✅ Filtrado y búsqueda comprehensiva
+- ✅ **Sistema de autorización entre contratos**
 
-### Product Catalog
-- ✅ Create products with company association
-- ✅ Product metadata (name, price, IPFS image hash)
-- ✅ Advanced filtering by company, price range, active status
-- ✅ Text search functionality
-- ✅ CRUD operations for products
-- ✅ Company ownership validation
+### Catálogo de Productos
+- ✅ Crear productos con asociación a empresa
+- ✅ Metadatos de productos (nombre, precio, hash de imagen IPFS)
+- ✅ Filtrado avanzado por empresa, rango de precios, estado activo
+- ✅ Funcionalidad de búsqueda de texto
+- ✅ Operaciones CRUD para productos
+- ✅ Validación de propiedad de empresa
+- ✅ **Gestión de stock en tiempo real**
+- ✅ **Actualización automática de stock en compras**
 
-## 🛠️ Setup and Installation
+### Sistema de Facturación
+- ✅ **Creación de facturas por propietarios de empresa**
+- ✅ **Creación de facturas por clientes (nueva funcionalidad)**
+- ✅ **Gestión de items de factura**
+- ✅ **Integración con sistema de tokens**
+- ✅ **Actualización automática de stock**
+- ✅ **Registro automático de compras de clientes**
+- ✅ **Seguimiento de pagos**
 
-### Prerequisites
+### Gestión de Clientes
+- ✅ **Registro de clientes por empresa**
+- ✅ **Seguimiento de compras de clientes**
+- ✅ **Estadísticas de clientes**
+- ✅ **Gestión de estado activo/inactivo**
+- ✅ **Contadores de facturas**
+
+## 🛠️ Configuración e Instalación
+
+### Prerrequisitos
 - [Foundry](https://book.getfoundry.sh/getting-started/installation)
-- [Anvil](https://book.getfoundry.sh/anvil/) for local development
+- [Anvil](https://book.getfoundry.sh/anvil/) para desarrollo local
 
-### Installation
+### Instalación
 
-1. Clone the repository and navigate to the backend directory:
+1. Clona el repositorio y navega al directorio backend:
 ```bash
 cd backend
 ```
 
-2. Install dependencies:
+2. Instala las dependencias:
 ```bash
 forge install
 ```
 
-3. Build the contracts:
+3. Construye los contratos:
 ```bash
 forge build
 ```
 
 ## 🧪 Testing
 
-Run all tests:
+Ejecuta todos los tests:
 ```bash
 forge test
 ```
 
-Run specific test files:
+Ejecuta archivos de test específicos:
 ```bash
 forge test --match-contract ITCToken20Test
 forge test --match-contract CompanyTest
 forge test --match-contract ProductsTest
+forge test --match-contract InvoiceTest
+forge test --match-contract ClientsTest
 forge test --match-contract IntegrationTest
 ```
 
-Run tests with gas reporting:
+Ejecuta tests con reporte de gas:
 ```bash
 forge test --gas-report
 ```
 
-Run tests with coverage:
+Ejecuta tests con cobertura:
 ```bash
 forge coverage
 ```
 
 ## 🚀 Deployment
 
-### Local Development (Anvil)
+### Desarrollo Local (Anvil)
 
-1. Start Anvil in one terminal:
+1. Inicia Anvil en una terminal:
 ```bash
 anvil
 ```
 
-2. Deploy contracts locally:
+2. Despliega contratos localmente:
+```bash
+./deploy_contracts.sh
+```
+
+O manualmente:
 ```bash
 forge script script/DeployLocal.s.sol --rpc-url http://localhost:8545 --broadcast
 ```
 
-### Testnet/Mainnet Deployment
+### Deployment en Testnet/Mainnet
 
-1. Set your private key as an environment variable:
+1. Configura tu clave privada como variable de entorno:
 ```bash
-export PRIVATE_KEY=your_private_key_here
+export PRIVATE_KEY=tu_clave_privada_aqui
 ```
 
-2. Deploy to Sepolia testnet:
+2. Despliega a Sepolia testnet:
 ```bash
 forge script script/Deploy.s.sol --rpc-url sepolia --broadcast --verify
 ```
 
-3. Deploy to mainnet:
+3. Despliega a mainnet:
 ```bash
 forge script script/Deploy.s.sol --rpc-url mainnet --broadcast --verify
 ```
 
-## 📖 Usage Examples
+## 📖 Ejemplos de Uso
 
-### Frontend Integration
-
-The contracts are designed to be easily integrated with frontend applications. Here are some key functions:
-
-#### Token Operations
+### Operaciones de Token
 ```solidity
-// Buy tokens
-ITCToken20(tokenAddress).buyTokens{value: ethAmount}(tokenAmount);
+// Comprar tokens
+ITCToken20(tokenAddress).buyTokens{value: ethAmount}();
 
-// Withdraw tokens
+// Retirar tokens
 ITCToken20(tokenAddress).withdrawTokens(tokenAmount);
 
-// Get token price
+// Quemar tokens propios
+ITCToken20(tokenAddress).selfBurn(amount);
+
+// Obtener precio del token
 uint256 price = ITCToken20(tokenAddress).getTokenPrice();
+
+// Obtener estadísticas de quemado
+(uint256 totalBurned, uint256 totalTransactions, uint256 average) = 
+    ITCToken20(tokenAddress).getBurnStatistics();
 ```
 
-#### Company Management
+### Gestión de Empresas
 ```solidity
-// Create company
-uint256 companyId = Company(companyAddress).createCompany("My Company");
+// Crear empresa
+uint256 companyId = Company(companyAddress).createCompany("Mi Empresa");
 
-// Get companies by owner
+// Obtener empresas por propietario
 CompanyData[] memory companies = Company(companyAddress).getCompaniesByOwner(owner);
 
-// Update company
-Company(companyAddress).updateCompany(companyId, "New Name");
+// Actualizar empresa
+Company(companyAddress).updateCompany(companyId, "Nuevo Nombre");
 ```
 
-#### Product Operations
+### Operaciones de Productos
 ```solidity
-// Create product
+// Crear producto
 uint256 productId = Products(productsAddress).createProduct(
     companyId, 
-    "Product Name", 
+    "Nombre del Producto", 
     price, 
-    "QmIPFSHash"
+    "QmIPFSHash",
+    stock
 );
 
-// Search products
-ProductData[] memory results = Products(productsAddress).searchProducts("search term");
+// Buscar productos
+ProductData[] memory results = Products(productsAddress).searchProducts("término de búsqueda");
 
-// Filter products
+// Filtrar productos
 ProductFilter memory filter = ProductFilter({
-    companyId: 0,        // 0 = all companies
+    companyId: 0,        // 0 = todas las empresas
     minPrice: 100 ether,
     maxPrice: 1000 ether,
     isActive: true,
@@ -194,69 +237,139 @@ ProductFilter memory filter = ProductFilter({
 ProductData[] memory filtered = Products(productsAddress).getProductsWithFilter(filter);
 ```
 
-## 🔧 Configuration
+### Sistema de Facturación
+```solidity
+// Crear factura (solo propietario de empresa)
+InvoiceItem[] memory items = new InvoiceItem[](1);
+items[0] = InvoiceItem({
+    productId: productId,
+    quantity: 2,
+    unitPrice: 100 ether,
+    totalPrice: 200 ether
+});
 
-### Foundry Configuration (foundry.toml)
-- Solidity version: 0.8.20
-- Optimizer enabled with 200 runs
-- Fuzz testing configured
-- RPC endpoints for Anvil, Sepolia, and Mainnet
+uint256 invoiceId = Invoice(invoiceAddress).createInvoiceWithProducts(
+    companyId,
+    invoiceNumber,
+    clientAddress,
+    items,
+    true // usar tokens
+);
 
-### Environment Variables
-- `PRIVATE_KEY`: Your wallet private key for deployment
-- `ALCHEMY_API_KEY`: For RPC endpoints
-- `ETHERSCAN_API_KEY`: For contract verification
+// Crear factura (cliente)
+uint256 invoiceId = Invoice(invoiceAddress).createInvoiceForPurchase(
+    companyId,
+    invoiceNumber,
+    msg.sender, // dirección del cliente
+    items,
+    true // usar tokens
+);
+```
 
-## 🛡️ Security Features
+### Gestión de Clientes
+```solidity
+// Registrar cliente
+Clients(clientsAddress).registerClient(companyId, clientAddress);
 
-- **ReentrancyGuard**: Prevents reentrancy attacks in token operations
-- **Access Control**: Owner-only functions for critical operations
-- **Input Validation**: Comprehensive validation for all inputs
-- **Safe Math**: Built-in overflow/underflow protection
-- **Ownership Verification**: Company owners can only manage their own entities
+// Registrar compra de cliente
+Clients(clientsAddress).registerClientPurchase(companyId, clientAddress, amount);
 
-## 📊 Gas Optimization
+// Obtener clientes activos por empresa
+address[] memory activeClients = Clients(clientsAddress).getActiveClientsByCompany(companyId);
+```
 
-- Efficient storage patterns
-- Minimal external calls
-- Optimized loops and iterations
-- Packed structs where possible
-- Events for efficient off-chain indexing
+## 🔧 Configuración
 
-## 🔍 Monitoring and Events
+### Configuración de Foundry (foundry.toml)
+- Versión de Solidity: 0.8.20
+- Optimizador habilitado con 200 runs
+- Testing fuzz configurado
+- Endpoints RPC para Anvil, Sepolia y Mainnet
 
-All contracts emit comprehensive events for:
-- Token purchases and withdrawals
-- Company creation and updates
-- Product management operations
-- Ownership transfers
-- Price updates
+### Variables de Entorno
+- `PRIVATE_KEY`: Tu clave privada de wallet para deployment
+- `ALCHEMY_API_KEY`: Para endpoints RPC
+- `ETHERSCAN_API_KEY`: Para verificación de contratos
 
-## 🤝 Contributing
+## 🛡️ Características de Seguridad
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests for new functionality
-5. Run the test suite
-6. Submit a pull request
+- **ReentrancyGuard**: Previene ataques de reentrancia en operaciones de tokens
+- **Control de Acceso**: Funciones solo para propietarios en operaciones críticas
+- **Validación de Entrada**: Validación comprehensiva para todas las entradas
+- **Safe Math**: Protección integrada contra overflow/underflow
+- **Verificación de Propiedad**: Los propietarios de empresas solo pueden gestionar sus propias entidades
+- **Autorización entre Contratos**: Sistema robusto de permisos entre contratos
+- **Validación de Stock**: Verificación de disponibilidad antes de compras
 
-## 📄 License
+## 📊 Optimización de Gas
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+- Patrones de almacenamiento eficientes
+- Llamadas externas mínimas
+- Bucles e iteraciones optimizadas
+- Structs empaquetados cuando es posible
+- Eventos para indexación eficiente off-chain
+- **Transacciones agrupadas** para reducir costos de gas
 
-## 🆘 Support
+## 🔍 Monitoreo y Eventos
 
-For support and questions:
-- Create an issue in the repository
-- Check the test files for usage examples
-- Review the contract interfaces for function signatures
+Todos los contratos emiten eventos comprehensivos para:
+- Compras y retiros de tokens
+- Creación y actualización de empresas
+- Operaciones de gestión de productos
+- Transferencias de propiedad
+- Actualizaciones de precios
+- **Creación y actualización de facturas**
+- **Registro de compras de clientes**
+- **Eventos de quemado de tokens con seguimiento completo**
 
-## 🚀 Next Steps
+## 🧪 Testing Comprehensivo
 
-- [ ] Add payment processing integration
-- [ ] Implement order management system
-- [ ] Add product reviews and ratings
-- [ ] Create admin dashboard
-- [ ] Add multi-signature wallet support
-- [ ] Implement upgradeable contracts
+### Cobertura de Tests
+- ✅ **190+ tests** cubriendo todos los contratos
+- ✅ Tests unitarios para cada función
+- ✅ Tests de integración entre contratos
+- ✅ Tests fuzz para validación robusta
+- ✅ Tests de casos edge y manejo de errores
+- ✅ Tests de autorización y permisos
+
+### Tipos de Tests
+- **Unit Tests**: Funcionalidad individual de cada contrato
+- **Integration Tests**: Interacciones entre contratos
+- **Fuzz Tests**: Validación con entradas aleatorias
+- **Gas Tests**: Optimización de costos de gas
+- **Security Tests**: Validación de medidas de seguridad
+
+## 🤝 Contribución
+
+1. Fork el repositorio
+2. Crea una rama de feature
+3. Realiza tus cambios
+4. Añade tests para nueva funcionalidad
+5. Ejecuta la suite de tests
+6. Envía un pull request
+
+## 📄 Licencia
+
+Este proyecto está licenciado bajo la Licencia MIT - ver el archivo LICENSE para detalles.
+
+## 🆘 Soporte
+
+Para soporte y preguntas:
+- Crea un issue en el repositorio
+- Revisa los archivos de test para ejemplos de uso
+- Revisa las interfaces de contratos para firmas de funciones
+
+## 🚀 Próximos Pasos
+
+- [x] Sistema de facturación completo
+- [x] Gestión de clientes
+- [x] Seguimiento de tokens quemados
+- [x] Optimización de gas y transacciones
+- [ ] Integración con procesadores de pago
+- [ ] Sistema de gestión de órdenes
+- [ ] Reseñas y calificaciones de productos
+- [ ] Dashboard de administración
+- [ ] Soporte para wallet multi-firma
+- [ ] Implementación de contratos actualizables
+- [ ] Sistema de notificaciones
+- [ ] Analytics y reportes avanzados
